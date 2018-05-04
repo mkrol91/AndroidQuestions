@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">AndroidQuestions</string>
+    <string name="android_header_splash">Android</string>
+    <string name="test_header_splash">Test</string>
 </resources>

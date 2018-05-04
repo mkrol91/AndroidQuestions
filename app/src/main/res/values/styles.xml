@@ -8,4 +8,9 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="SplashHeader">
+        <item name="android:textSize">@dimen/h1_text_size</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
 </resources>
