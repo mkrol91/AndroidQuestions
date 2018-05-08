@@ -1,11 +1,9 @@
 package com.example.mirek.androidquestions.splash
 
-import android.graphics.Rect
+import android.animation.TimeInterpolator
 import android.os.Bundle
-import android.os.Handler
 import android.support.constraint.ConstraintSet
 import android.support.transition.ChangeBounds
-import android.support.transition.Explode
 import android.support.transition.Transition
 import android.support.transition.TransitionManager
 import android.support.v4.app.Fragment
@@ -13,9 +11,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
-import android.view.animation.AnticipateOvershootInterpolator
 import com.example.mirek.androidquestions.R
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.splash_fragment_initial.*
+import java.util.concurrent.TimeUnit
 
 class SplashFragment() : Fragment() {
 
@@ -26,45 +27,56 @@ class SplashFragment() : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val initialConstraints = ConstraintSet()
-        initialConstraints.clone(splash_root)
-
-        val secondChangeBounds = customChangeBoundsTransition({
-            interpolator = AccelerateInterpolator()
-            duration = 1000
-        }, {
-            val explode = ChangeBounds()
-            explode.duration = 500
-            explode.interpolator = AccelerateInterpolator()
-
-            val fourthConstraints = ConstraintSet()
-            fourthConstraints.clone(activity, R.layout.splash_fragment_fourth)
-            applyAnimationToRoot(fourthConstraints, explode)
-        })
-
-        val firstChangeBounds = customChangeBoundsTransition(
-                {
-                    interpolator = AccelerateInterpolator()
-                    duration = 1000
+        val animationPhases = arrayListOf(
+                ConstraintSet().apply {
+                    clone(splash_root)
                 },
-                {
-                    val thirdConstraints = ConstraintSet()
-                    thirdConstraints.clone(activity, R.layout.splash_fragment_third)
-                    applyAnimationToRoot(thirdConstraints, secondChangeBounds)
+                ConstraintSet().apply {
+                    clone(activity, R.layout.splash_fragment_second)
+                },
+                ConstraintSet().apply {
+                    clone(activity, R.layout.splash_fragment_third)
+                },
+                ConstraintSet().apply {
+                    clone(activity, R.layout.splash_fragment_fourth)
+                },
+                ConstraintSet().apply {
+                    clone(activity, R.layout.splash_fragment_f)
                 }
         )
 
-        Handler().postDelayed({
-            val secondConstraints = ConstraintSet()
-            secondConstraints.clone(activity, R.layout.splash_fragment_second)
-            applyAnimationToRoot(secondConstraints, firstChangeBounds)
-        }, 1000)
 
+        val sixthChangeBounds = customChangeBoundsTransition(500, AccelerateInterpolator(), {})
+        val fifthChangeBounds = customChangeBoundsTransition(5000, AccelerateInterpolator(),
+                {
+                    //  applyAnimationToRoot(animationPhases[4], sixthChangeBounds)
+                })
+        val fourthChangeBounds = customChangeBoundsTransition(1000, AccelerateInterpolator(),
+                {
+                    applyAnimationToRoot(animationPhases[3], fifthChangeBounds)
+                })
+        val thiChangeBounds = customChangeBoundsTransition(1000, AccelerateInterpolator(),
+                {
+                    applyAnimationToRoot(animationPhases[2], fourthChangeBounds)
+                })
+        val secChangeBounds = customChangeBoundsTransition(1000, AccelerateInterpolator(),
+                {
+                    applyAnimationToRoot(animationPhases[1], thiChangeBounds)
+                })
+
+        Observable.just(1).subscribeOn(Schedulers.io())
+                .delay(3000, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    applyAnimationToRoot(animationPhases[0], secChangeBounds)
+                }
     }
 
-    fun customChangeBoundsTransition(initParameters: ChangeBounds.() -> Unit, onTransitionEnd: ChangeBounds.() -> Unit): ChangeBounds {
+    fun customChangeBoundsTransition(durationTime: Long, interpolatorType: TimeInterpolator,
+                                     onTransitionEnd: ChangeBounds.() -> Unit): ChangeBounds {
         return ChangeBounds().apply {
-            initParameters()
+            duration = durationTime
+            interpolator = interpolatorType
             addListener(object : Transition.TransitionListener {
                 override fun onTransitionEnd(transition: Transition) {
                     onTransitionEnd()
@@ -85,17 +97,10 @@ class SplashFragment() : Fragment() {
         }
     }
 
-
     private fun applyAnimationToRoot(newConstraints: ConstraintSet, preparedTransition: ChangeBounds) {
         TransitionManager.beginDelayedTransition(splash_root, preparedTransition)
         newConstraints.applyTo(splash_root)
     }
-
-    private fun applyAnimationToRoot(newConstraints: ConstraintSet, preparedTransition: Explode) {
-        TransitionManager.beginDelayedTransition(splash_root, preparedTransition)
-        newConstraints.applyTo(splash_root)
-    }
-
 
     companion object {
         fun newInstance(): SplashFragment {
