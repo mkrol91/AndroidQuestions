@@ -27,22 +27,29 @@ class SplashFragment() : Fragment() {
         val initialConstraints = ConstraintSet()
         initialConstraints.clone(splash_root)
 
-        val secondConstraints = ConstraintSet()
-        secondConstraints.clone(activity, R.layout.splash_fragment_second)
-
-        val thirdConstraints = ConstraintSet()
-        thirdConstraints.clone(activity, R.layout.splash_fragment_third)
-
-        val transition = customTransition({
+        val secondTransition = customTransition({
             interpolator = AccelerateInterpolator()
             duration = 3000
-        }, {
-            applyAnimationToRoot(thirdConstraints, this)
-        })
+        }, {})
+
+        val firstTransition = customTransition(
+                {
+                    interpolator = AccelerateInterpolator()
+                    duration = 3000
+                },
+                {
+                    val thirdConstraints = ConstraintSet()
+                    thirdConstraints.clone(activity, R.layout.splash_fragment_third)
+                    applyAnimationToRoot(thirdConstraints, secondTransition)
+                }
+        )
 
         Handler().postDelayed({
-            applyAnimationToRoot(secondConstraints, transition)
+            val secondConstraints = ConstraintSet()
+            secondConstraints.clone(activity, R.layout.splash_fragment_second)
+            applyAnimationToRoot(secondConstraints, firstTransition)
         }, 3000)
+
     }
 
     fun customTransition(block: ChangeBounds.() -> Unit, endAction: ChangeBounds.() -> Unit): ChangeBounds {
@@ -68,7 +75,7 @@ class SplashFragment() : Fragment() {
         return changeBounds
     }
 
-    private fun applyAnimationToRoot(newConstraints: ConstraintSet, preparedTransition: ChangeBounds, transitionEndAction: () -> Unit = emptyUnit()) {
+    private fun applyAnimationToRoot(newConstraints: ConstraintSet, preparedTransition: ChangeBounds) {
         TransitionManager.beginDelayedTransition(splash_root, preparedTransition)
         newConstraints.applyTo(splash_root)
     }
