@@ -13,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
+import android.view.animation.OvershootInterpolator
 import com.example.mirek.androidquestions.R
 import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -86,7 +87,7 @@ class SplashFragment() : Fragment() {
             val animation2 = Completable.create {
                 applyAnimationToRoot(ConstraintSet().apply {
                     clone(activity, R.layout.splash_fragment_third)
-                }, customChangeBoundsTransition(1000, AccelerateInterpolator(), {
+                }, customChangeBoundsTransition(2000, AccelerateInterpolator(), {
                     Log.i("animationFlow", "anim 2 finished")
                     it.onComplete()
                 }))
@@ -95,7 +96,7 @@ class SplashFragment() : Fragment() {
             val animation3 = Completable.create {
                 applyAnimationToRoot(ConstraintSet().apply {
                     clone(activity, R.layout.splash_fragment_fourth)
-                }, customChangeBoundsTransition(1000, AccelerateInterpolator(), {
+                }, customChangeBoundsTransition(500, OvershootInterpolator(), {
                     Log.i("animationFlow", "anim 3 finished")
                     it.onComplete()
                 }))
@@ -105,10 +106,20 @@ class SplashFragment() : Fragment() {
                 explosion.animate().alpha(0f).withEndAction {
                     it.onComplete()
                     Log.i("animationFlow", "anim 4 finished")
-                }
+                }.duration = 300
             }
 
-            animation1.andThen(animation2).andThen(animation3).andThen(animation4)
+            val animation5 = Completable.create {
+                applyAnimationToRoot(ConstraintSet().apply {
+                    clone(activity, R.layout.splash_fragment_end)
+                }, customChangeBoundsTransition(300, OvershootInterpolator(), {
+                    Log.i("animationFlow", "anim 5 finished")
+                    it.onComplete()
+                }))
+            }
+
+            animation1.andThen(animation2).andThen(animation3).andThen(animation4).andThen(animation5
+            )
                     .subscribeOn(AndroidSchedulers.mainThread())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe({
