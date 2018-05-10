@@ -18,12 +18,12 @@ import com.example.mirek.androidquestions.R
 import io.reactivex.Completable
 import io.reactivex.CompletableEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
-import kotlinx.android.synthetic.main.splash_fragment_initial.*
+import kotlinx.android.synthetic.main.splash_fragment_initial_empty.*
 
 class SplashFragment() : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.splash_fragment_initial, container, false)
+        return inflater.inflate(R.layout.splash_fragment_initial_empty, container, false)
     }
 
     override fun onResume() {
@@ -45,19 +45,16 @@ class SplashFragment() : Fragment() {
                     Handler().postDelayed({ it.onComplete() }, 100)
                 },
                 Completable.create {
-                    applyAnimationToRoot(R.layout.splash_fragment_second, changeBoundsTransition(500, AccelerateInterpolator(), it))
+                    applyAnimationToRoot(R.layout.splash_fragment_only_title, changeBoundsTransition(500, AccelerateInterpolator(), it))
                 },
                 Completable.create {
-                    applyAnimationToRoot(R.layout.splash_fragment_third, changeBoundsTransition(2000, AccelerateInterpolator(), it))
+                    applyAnimationToRoot(R.layout.splash_fragment_rocket, changeBoundsTransition(2000, AccelerateInterpolator(), it))
                 },
                 Completable.create {
-                    applyAnimationToRoot(R.layout.splash_fragment_fourth, changeBoundsTransition(200, OvershootInterpolator(), it))
+                    applyAnimationToRoot(R.layout.splash_fragment_explosion, changeBoundsTransition(200, OvershootInterpolator(), it))
                 },
                 Completable.create {
                     explosion.animate().alpha(0f).withEndAction { it.onComplete() }.duration = 200
-                },
-                Completable.create {
-                    applyAnimationToRoot(R.layout.splash_fragment_end, changeBoundsTransition(300, OvershootInterpolator(), it))
                 },
                 Completable.create {
                     with(atCs) {
