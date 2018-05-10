@@ -26,14 +26,20 @@ class SplashFragment() : Fragment() {
         return inflater.inflate(R.layout.splash_fragment_initial, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-    }
-
     override fun onResume() {
         super.onResume()
+        Completable.concat(createAnimations())
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    Log.i("abcd", "success")
+                }, {
+                    Log.i("abcd", "error:" + it)
+                })
+    }
 
-        var animations = arrayListOf(
+    private fun createAnimations(): ArrayList<Completable> {
+        return arrayListOf(
                 Completable.create {
                     //TODO: How to do it better or how to remove it?
                     Handler().postDelayed({ it.onComplete() }, 100)
@@ -61,15 +67,6 @@ class SplashFragment() : Fragment() {
                     }
                 }
         )
-
-        Completable.concat(animations)
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-                    Log.i("abcd", "success")
-                }, {
-                    Log.i("abcd", "error:" + it)
-                })
     }
 
     fun changeBoundsTransition(durationTime: Long, interpolatorType: TimeInterpolator,
