@@ -36,38 +36,29 @@ class SplashFragment() : Fragment() {
         var animations = arrayListOf(
                 Completable.create {
                     //TODO: How to do it better or how to remove it?
-                    Handler().postDelayed({
-                        it.onComplete()
-                    }, 100)
+                    Handler().postDelayed({ it.onComplete() }, 100)
                 },
                 Completable.create {
-                    applyAnimationToRoot(ConstraintSet().apply {
-                        clone(activity, R.layout.splash_fragment_second)
-                    }, changeBoundsTransition(500, AccelerateInterpolator(), it))
+                    applyAnimationToRoot(R.layout.splash_fragment_second, changeBoundsTransition(500, AccelerateInterpolator(), it))
                 },
                 Completable.create {
-                    applyAnimationToRoot(ConstraintSet().apply {
-                        clone(activity, R.layout.splash_fragment_third)
-                    }, changeBoundsTransition(2000, AccelerateInterpolator(), it))
+                    applyAnimationToRoot(R.layout.splash_fragment_third, changeBoundsTransition(2000, AccelerateInterpolator(), it))
                 },
                 Completable.create {
-                    applyAnimationToRoot(ConstraintSet().apply {
-                        clone(activity, R.layout.splash_fragment_fourth)
-                    }, changeBoundsTransition(200, OvershootInterpolator(), it))
+                    applyAnimationToRoot(R.layout.splash_fragment_fourth, changeBoundsTransition(200, OvershootInterpolator(), it))
                 },
                 Completable.create {
-                    explosion.animate().alpha(0f)
-                            .withEndAction { it.onComplete() }.duration = 200
+                    explosion.animate().alpha(0f).withEndAction { it.onComplete() }.duration = 200
                 },
                 Completable.create {
-                    applyAnimationToRoot(ConstraintSet().apply {
-                        clone(activity, R.layout.splash_fragment_end)
-                    }, changeBoundsTransition(300, OvershootInterpolator(), it))
+                    applyAnimationToRoot(R.layout.splash_fragment_end, changeBoundsTransition(300, OvershootInterpolator(), it))
                 },
                 Completable.create {
-                    atCs.visibility = View.VISIBLE
-                    atCs.alpha = 0f
-                    atCs.animate().alpha(1f).withEndAction { it.onComplete() }.duration = 5000
+                    with(atCs) {
+                        visibility = View.VISIBLE
+                        alpha = 0f
+                        animate().alpha(1f).withEndAction { it.onComplete() }.duration = 5000
+                    }
                 }
         )
 
@@ -79,26 +70,6 @@ class SplashFragment() : Fragment() {
                 }, {
                     Log.i("abcd", "error:" + it)
                 })
-        //Other way to do this:
-//        Completable.create {
-//            //TODO: How to do it better or how to remove it?
-//            Handler().postDelayed({
-//                it.onComplete()
-//            }, 100)
-//        }
-//                .andThen(animation1)
-//                .andThen(animation2)
-//                .andThen(animation3)
-//                .andThen(animation4)
-//                .andThen(animation5)
-//                .andThen(animation6)
-//                .subscribeOn(AndroidSchedulers.mainThread())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe({
-//                    Log.i("abcd", "success")
-//                }, {
-//                    Log.i("abcd", "error:" + it)
-//                })
     }
 
     fun changeBoundsTransition(durationTime: Long, interpolatorType: TimeInterpolator,
@@ -131,9 +102,11 @@ class SplashFragment() : Fragment() {
         }
     }
 
-    private fun applyAnimationToRoot(newConstraints: ConstraintSet, preparedTransition: ChangeBounds) {
+    private fun applyAnimationToRoot(nextFrameId: Int, preparedTransition: ChangeBounds) {
         TransitionManager.beginDelayedTransition(splash_root, preparedTransition)
-        newConstraints.applyTo(splash_root)
+        ConstraintSet().apply {
+            clone(activity, nextFrameId)
+        }.applyTo(splash_root)
     }
 
     companion object {
