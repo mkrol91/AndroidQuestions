@@ -1,99 +1,73 @@
 package com.example.mirek.androidquestions.splash
 
-import android.animation.TimeInterpolator
+import android.arch.lifecycle.Observer
 import android.os.Bundle
-import android.os.Handler
 import android.support.constraint.ConstraintSet
 import android.support.transition.ChangeBounds
-import android.support.transition.Transition
 import android.support.transition.TransitionManager
 import android.support.v4.app.Fragment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AccelerateInterpolator
-import android.view.animation.OvershootInterpolator
 import com.example.mirek.androidquestions.R
-import io.reactivex.Completable
-import io.reactivex.CompletableEmitter
-import io.reactivex.android.schedulers.AndroidSchedulers
+import com.example.mirek.androidquestions.databinding.SplashFragmentInitialEmptyBinding
 import kotlinx.android.synthetic.main.splash_fragment_initial_empty.*
 
 class SplashFragment() : Fragment() {
 
+    private lateinit var viewDataBinding: SplashFragmentInitialEmptyBinding
+    private var currentLayoutId: Int = R.layout.splash_fragment_initial_empty;
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.splash_fragment_initial_empty, container, false)
+        val root = inflater.inflate(R.layout.splash_fragment_initial_empty, container, false)
+
+        viewDataBinding = SplashFragmentInitialEmptyBinding.bind(root).apply {
+            viewmodel = (activity as SplashActivity).obtainViewModel()
+        }
+
+        return viewDataBinding.root
     }
 
-    override fun onResume() {
-        super.onResume()
-        Completable.concat(createAnimations())
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-                    Log.i("abcd", "success")
-                }, {
-                    Log.i("abcd", "error:" + it)
-                })
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        if (savedInstanceState != null) {
+            currentLayoutId = savedInstanceState.get(CURRENT_LAYOUT) as Int
+            ConstraintSet().apply {
+                clone(activity, currentLayoutId)
+            }.applyTo(splash_root)
+        }
     }
 
-    private fun createAnimations(): ArrayList<Completable> {
-        return arrayListOf(
-                Completable.create {
-                    //TODO: How to do it better or how to remove it?
-                    Handler().postDelayed({ it.onComplete() }, 100)
-                },
-                Completable.create {
-                    applyAnimationToRoot(R.layout.splash_fragment_only_title, changeBoundsTransition(500, AccelerateInterpolator(), it))
-                },
-                Completable.create {
-                    applyAnimationToRoot(R.layout.splash_fragment_rocket, changeBoundsTransition(2000, AccelerateInterpolator(), it))
-                },
-                Completable.create {
-                    applyAnimationToRoot(R.layout.splash_fragment_explosion, changeBoundsTransition(200, OvershootInterpolator(), it))
-                },
-                Completable.create {
-                    explosion.animate().alpha(0f).withEndAction { it.onComplete() }.duration = 200
-                },
-                Completable.create {
-                    with(atCs) {
-                        visibility = View.VISIBLE
-                        alpha = 0f
-                        animate().alpha(1f).withEndAction { it.onComplete() }.duration = 5000
-                    }
-                }
-        )
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        setupAnimations()
+
+        viewDataBinding.viewmodel?.run {
+            savedInstanceState?.run {
+                startAnimation(currentLayoutId, explosion.id, atCs.id)
+            } ?: startAnimation()
+        }
     }
 
-    fun changeBoundsTransition(durationTime: Long, interpolatorType: TimeInterpolator,
-                               emitter: CompletableEmitter): ChangeBounds {
-        return ChangeBounds().apply {
-            duration = durationTime
-            interpolator = interpolatorType
-            addListener(object : Transition.TransitionListener {
-                override fun onTransitionEnd(transition: Transition) {
-                    Log.i("abcd", "trans end")
-                    emitter.onComplete()
-                }
 
-                override fun onTransitionResume(transition: Transition) {
-                    Log.i("abcd", "trans resume")
-                }
-
-                override fun onTransitionPause(transition: Transition) {
-                    Log.i("abcd", "trans pause")
-                }
-
-                override fun onTransitionCancel(transition: Transition) {
-                    Log.i("abcd", "trans cancel")
-                }
-
-                override fun onTransitionStart(transition: Transition) {
-                    Log.i("abcd", "trans start")
+    private fun setupAnimations() {
+        viewDataBinding.viewmodel?.let {
+            it.animationPhaseCompletedCommand.observe(this, Observer {
+                it?.let {
+                    val (layoutId, changeBounds) = it
+                    currentLayoutId = layoutId
+                    Log.i("animPhases", "layout id: $currentLayoutId")
+                    applyAnimationToRoot(currentLayoutId, changeBounds)
                 }
             })
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(CURRENT_LAYOUT, currentLayoutId);
     }
 
     private fun applyAnimationToRoot(nextFrameId: Int, preparedTransition: ChangeBounds) {
@@ -104,6 +78,9 @@ class SplashFragment() : Fragment() {
     }
 
     companion object {
+
+        private const val CURRENT_LAYOUT = "CURRENT_LAYOUT"
+
         fun newInstance(): SplashFragment {
             return SplashFragment()
         }
