@@ -19,10 +19,10 @@ import io.reactivex.disposables.CompositeDisposable
 
 class SplashViewModel(context: Application, repository: DataRepository) : AndroidViewModel(context) {
 
-    var animationPhaseCompletedCommand = SingleLiveEvent<Pair<Int, ChangeBounds>>()
+    var changeBoundsAnimationCommand = SingleLiveEvent<Pair<Int, ChangeBounds>>()
+    var fadeAnimationCommand = SingleLiveEvent<Triple<Float, Long, CompletableEmitter>>()
 
     private var disposables = CompositeDisposable()
-
 
     fun startAnimation(currentLayoutId: Int = -1, explosionId: Int = -1, atCsId: Int = -1) {
         if (disposables.size() == 0) {
@@ -37,8 +37,6 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
         }
     }
 
-    //View model hold UI data for the activity, activity is only respon for how to draw data on screen
-
     private fun provideAnimations(currentLayoutId: Int, explosionId: Int, atCsId: Int):
             ArrayList<Completable> {
         return arrayListOf(
@@ -49,7 +47,7 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
                 Completable.create {
                     when (currentLayoutId) {
                         R.layout.splash_fragment_only_title, -1 ->
-                            animationPhaseCompletedCommand.value = Pair(R.layout.splash_fragment_only_title,
+                            changeBoundsAnimationCommand.value = Pair(R.layout.splash_fragment_only_title,
                                     changeBoundsTransition(500, AccelerateInterpolator(), it))
                         else -> it.onComplete()
                     }
@@ -57,7 +55,7 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
                 Completable.create {
                     when (currentLayoutId) {
                         R.layout.splash_fragment_rocket, -1 ->
-                            animationPhaseCompletedCommand.value = Pair(R.layout.splash_fragment_rocket,
+                            changeBoundsAnimationCommand.value = Pair(R.layout.splash_fragment_rocket,
                                     changeBoundsTransition(2000, AccelerateInterpolator(), it))
                         else -> it.onComplete()
                     }
@@ -65,20 +63,13 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
                 Completable.create {
                     when (currentLayoutId) {
                         R.layout.splash_fragment_explosion, -1 ->
-                            animationPhaseCompletedCommand.value = Pair(R.layout.splash_fragment_explosion,
+                            changeBoundsAnimationCommand.value = Pair(R.layout.splash_fragment_explosion,
                                     changeBoundsTransition(200, OvershootInterpolator(), it))
                         else -> it.onComplete()
                     }
                 },
                 Completable.create {
-                    //                    changeBoundsAnimation.value = AnimationPhases.EXPLOSION_HIDE
-//
-//
-//                    explosion.animate().alpha(0f).withEndAction { it.onComplete() }.duration = 200
-//
-//
-//                    changeBoundsAnimation.value = Pair(R.layout.splash_fragment_explosion,
-//                            changeBoundsTransition(200, OvershootInterpolator(), it))
+                    fadeAnimationCommand.value = Triple(0f, 200, it)
                 },
                 Completable.create {
                     //                    changeBoundsAnimation.value = AnimationPhases.FINAL_TITLE
@@ -106,24 +97,19 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
             interpolator = interpolatorType
             addListener(object : Transition.TransitionListener {
                 override fun onTransitionEnd(transition: Transition) {
-                    Log.i("abcd", "trans end")
                     emitter.onComplete()
                 }
 
                 override fun onTransitionResume(transition: Transition) {
-                    Log.i("abcd", "trans resume")
                 }
 
                 override fun onTransitionPause(transition: Transition) {
-                    Log.i("abcd", "trans pause")
                 }
 
                 override fun onTransitionCancel(transition: Transition) {
-                    Log.i("abcd", "trans cancel")
                 }
 
                 override fun onTransitionStart(transition: Transition) {
-                    Log.i("abcd", "trans start")
                 }
             })
         }

@@ -36,6 +36,11 @@ class SplashFragment() : Fragment() {
             ConstraintSet().apply {
                 clone(activity, currentLayoutId)
             }.applyTo(splash_root)
+
+            //when user rotate screen during explosion, after rotation it should'n appear
+            if (currentLayoutId == R.layout.splash_fragment_explosion) {
+                explosion.visibility = View.GONE
+            }
         }
     }
 
@@ -54,12 +59,25 @@ class SplashFragment() : Fragment() {
 
     private fun setupAnimations() {
         viewDataBinding.viewmodel?.let {
-            it.animationPhaseCompletedCommand.observe(this, Observer {
+            it.changeBoundsAnimationCommand.observe(this, Observer {
                 it?.let {
                     val (layoutId, changeBounds) = it
                     currentLayoutId = layoutId
                     Log.i("animPhases", "layout id: $currentLayoutId")
                     applyAnimationToRoot(currentLayoutId, changeBounds)
+                }
+            })
+
+            it.fadeAnimationCommand.observe(this, Observer {
+                it?.let {
+                    val (alpha, duration, emitter) = it
+                    explosion.animate()
+                            .alpha(alpha)
+                            .setDuration(duration)
+                            .withEndAction {
+                                //TODO: Shouldn't it go to ViewModel? And if so - how to do this?
+                                emitter.onComplete()
+                            }
                 }
             })
         }
