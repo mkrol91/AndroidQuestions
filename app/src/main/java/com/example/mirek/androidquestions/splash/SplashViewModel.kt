@@ -4,6 +4,7 @@ import android.animation.TimeInterpolator
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.os.Handler
+import android.support.annotation.IdRes
 import android.support.transition.ChangeBounds
 import android.support.transition.Transition
 import android.util.Log
@@ -20,7 +21,9 @@ import io.reactivex.disposables.CompositeDisposable
 class SplashViewModel(context: Application, repository: DataRepository) : AndroidViewModel(context) {
 
     var changeBoundsAnimationCommand = SingleLiveEvent<Pair<Int, ChangeBounds>>()
-    var fadeAnimationCommand = SingleLiveEvent<Triple<Float, Long, CompletableEmitter>>()
+    var fadeExplosionCommand = SingleLiveEvent<Triple<Float, Long, CompletableEmitter>>()
+    var fadeAtCsCommand = SingleLiveEvent<Triple<Float, Long, CompletableEmitter>>()
+    var changeConstraintsCommand = SingleLiveEvent<Pair<@IdRes Int, CompletableEmitter>>()
 
     private var disposables = CompositeDisposable()
 
@@ -51,7 +54,8 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
         val animationPhases =
                 arrayListOf(R.layout.splash_fragment_only_title,
                         R.layout.splash_fragment_rocket,
-                        R.layout.splash_fragment_explosion)
+                        R.layout.splash_fragment_explosion,
+                        R.layout.splash_fragment_initial_empty)
 
         if (animationPhase < animationPhases.size) {
             return animationPhases[animationPhase]
@@ -79,18 +83,21 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
                 },
                 Completable.create {
                     Log.i("animationFlowDebug", "fade explosion animation")
-                    fadeAnimationCommand.value = Triple(0f, 200, it)
+                    fadeExplosionCommand.value = Triple(0f, 200, it)
                 },
                 Completable.create {
-                    //                    changeBoundsAnimation.value = AnimationPhases.FINAL_TITLE
+                    Log.i("animationFlowDebug", "@CS animation" + getlayoutForPhase(3))
+                    changeConstraintsCommand.value = Pair(getlayoutForPhase(3),it)
+
+
+//                    fadeExplosionCommand.value = Triple(R.layout.splash_fragment_initial_empty,)
+                    //Triple(0f)
 //
 //
-//
-////                    with(atCs) {
-////                        visibility = android.view.View.VISIBLE
-////                        alpha = 0f
-////                        animate().alpha(1f).withEndAction { it.onComplete() }.duration = 5000
-////                    }
+
+                },
+                Completable.create {
+                    fadeAtCsCommand.value = Triple(1f, 5000, it)
                 }
         )
     }
