@@ -24,9 +24,10 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
 
     private var disposables = CompositeDisposable()
 
-    fun startAnimation(currentLayoutId: Int = -1, explosionId: Int = -1, atCsId: Int = -1) {
+    fun startAnimation(completedAnimationPhases: Int) {
         if (disposables.size() == 0) {
-            disposables.add(Completable.concat(provideAnimations(currentLayoutId, explosionId, atCsId))
+            disposables.add(Completable.concat(initialDelay() +
+                    splashAnimations().drop(completedAnimationPhases))
                     .subscribeOn(AndroidSchedulers.mainThread())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe({
@@ -37,38 +38,47 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
         }
     }
 
-    private fun provideAnimations(currentLayoutId: Int, explosionId: Int, atCsId: Int):
-            ArrayList<Completable> {
+    private fun initialDelay(): ArrayList<Completable> {
         return arrayListOf(
                 Completable.create {
                     //TODO: How to do it better or how to remove it?
                     Handler().postDelayed({ it.onComplete() }, 100)
+                }
+        )
+    }
+
+    fun getlayoutForPhase(animationPhase: Int): Int {
+        val animationPhases =
+                arrayListOf(R.layout.splash_fragment_only_title,
+                        R.layout.splash_fragment_rocket,
+                        R.layout.splash_fragment_explosion)
+
+        if (animationPhase < animationPhases.size) {
+            return animationPhases[animationPhase]
+        } else {
+            return R.layout.splash_fragment_explosion
+        }
+    }
+
+    private fun splashAnimations(): ArrayList<Completable> {
+        return arrayListOf(
+                Completable.create {
+                    Log.i("animationFlowDebug", "animate to splash_fragment_only_title")
+                    changeBoundsAnimationCommand.value = Pair(getlayoutForPhase(0),
+                            changeBoundsTransition(500, AccelerateInterpolator(), it))
                 },
                 Completable.create {
-                    when (currentLayoutId) {
-                        R.layout.splash_fragment_only_title, -1 ->
-                            changeBoundsAnimationCommand.value = Pair(R.layout.splash_fragment_only_title,
-                                    changeBoundsTransition(500, AccelerateInterpolator(), it))
-                        else -> it.onComplete()
-                    }
+                    Log.i("animationFlowDebug", "animate to splash_fragment_rocket")
+                    changeBoundsAnimationCommand.value = Pair(getlayoutForPhase(1),
+                            changeBoundsTransition(2000, AccelerateInterpolator(), it))
                 },
                 Completable.create {
-                    when (currentLayoutId) {
-                        R.layout.splash_fragment_rocket, -1 ->
-                            changeBoundsAnimationCommand.value = Pair(R.layout.splash_fragment_rocket,
-                                    changeBoundsTransition(2000, AccelerateInterpolator(), it))
-                        else -> it.onComplete()
-                    }
+                    Log.i("animationFlowDebug", "animate to splash_fragment_explosion")
+                    changeBoundsAnimationCommand.value = Pair(getlayoutForPhase(2),
+                            changeBoundsTransition(200, OvershootInterpolator(), it))
                 },
                 Completable.create {
-                    when (currentLayoutId) {
-                        R.layout.splash_fragment_explosion, -1 ->
-                            changeBoundsAnimationCommand.value = Pair(R.layout.splash_fragment_explosion,
-                                    changeBoundsTransition(200, OvershootInterpolator(), it))
-                        else -> it.onComplete()
-                    }
-                },
-                Completable.create {
+                    Log.i("animationFlowDebug", "fade explosion animation")
                     fadeAnimationCommand.value = Triple(0f, 200, it)
                 },
                 Completable.create {

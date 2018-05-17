@@ -17,11 +17,16 @@ import kotlinx.android.synthetic.main.splash_fragment_initial_empty.*
 class SplashFragment() : Fragment() {
 
     private lateinit var viewDataBinding: SplashFragmentInitialEmptyBinding
-    private var currentLayoutId: Int = R.layout.splash_fragment_initial_empty;
+    private var completedAnimationPhases: Int = 0
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val root = inflater.inflate(R.layout.splash_fragment_initial_empty, container, false)
-
+        Log.i("animationFlowDebug", "---animation layout ids------------------------------------------------------------------------------------------------------------------------")
+        Log.i("animationFlowDebug", "splash_fragment_initial_empty: " + R.layout.splash_fragment_initial_empty)
+        Log.i("animationFlowDebug", "splash_fragment_only_title: " + R.layout.splash_fragment_only_title)
+        Log.i("animationFlowDebug", "splash_fragment_rocket: " + R.layout.splash_fragment_rocket)
+        Log.i("animationFlowDebug", "splash_fragment_explosion: " + R.layout.splash_fragment_explosion)
+        Log.i("animationFlowDebug", "--------------------------")
         viewDataBinding = SplashFragmentInitialEmptyBinding.bind(root).apply {
             viewmodel = (activity as SplashActivity).obtainViewModel()
         }
@@ -32,39 +37,44 @@ class SplashFragment() : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         if (savedInstanceState != null) {
-            currentLayoutId = savedInstanceState.get(CURRENT_LAYOUT) as Int
-            ConstraintSet().apply {
-                clone(activity, currentLayoutId)
-            }.applyTo(splash_root)
+            completedAnimationPhases = savedInstanceState.get(COMPLETED_ANIMATION_PHASES) as Int
+            if (completedAnimationPhases > 0) {
+                viewDataBinding.viewmodel?.run {
+                    val layout = getlayoutForPhase(completedAnimationPhases - 1)
+                    //when user rotate screen during explosion, after rotation it should'n appear
 
-            //when user rotate screen during explosion, after rotation it should'n appear
-            if (currentLayoutId == R.layout.splash_fragment_explosion) {
-                explosion.visibility = View.GONE
+                    ConstraintSet().apply {
+                        Log.i("animationFlowDebug", "applying constraints from layout [ " + layout + " ]" + " (view restored)")
+                        clone(activity, layout)
+                    }.applyTo(splash_root)
+                    if (layout == R.layout.splash_fragment_explosion) {
+                        explosion.visibility = View.GONE
+                    }
+                }
             }
         }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
         setupAnimations()
-
-        viewDataBinding.viewmodel?.run {
-            savedInstanceState?.run {
-                startAnimation(currentLayoutId, explosion.id, atCs.id)
-            } ?: startAnimation()
-        }
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewDataBinding.viewmodel?.run {
+            Log.i("animationFlowDebug", "startAnimation, completedAnimationPhases: " + completedAnimationPhases)
+            startAnimation(completedAnimationPhases)
+        }
+    }
 
     private fun setupAnimations() {
         viewDataBinding.viewmodel?.let {
             it.changeBoundsAnimationCommand.observe(this, Observer {
                 it?.let {
                     val (layoutId, changeBounds) = it
-                    currentLayoutId = layoutId
-                    Log.i("animPhases", "layout id: $currentLayoutId")
-                    applyAnimationToRoot(currentLayoutId, changeBounds)
+                    applyAnimationToRoot(changeBounds)
+                    ++completedAnimationPhases;
                 }
             })
 
@@ -85,19 +95,20 @@ class SplashFragment() : Fragment() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putInt(CURRENT_LAYOUT, currentLayoutId);
+        outState.putInt(COMPLETED_ANIMATION_PHASES, completedAnimationPhases);
     }
 
-    private fun applyAnimationToRoot(nextFrameId: Int, preparedTransition: ChangeBounds) {
+    private fun applyAnimationToRoot(preparedTransition: ChangeBounds) {
         TransitionManager.beginDelayedTransition(splash_root, preparedTransition)
         ConstraintSet().apply {
-            clone(activity, nextFrameId)
+            viewDataBinding.viewmodel?.run {
+                clone(activity, getlayoutForPhase(completedAnimationPhases))
+            }
         }.applyTo(splash_root)
     }
 
     companion object {
-
-        private const val CURRENT_LAYOUT = "CURRENT_LAYOUT"
+        private val COMPLETED_ANIMATION_PHASES: String = "COMPLETED_ANIMATION_PHASES"
 
         fun newInstance(): SplashFragment {
             return SplashFragment()
