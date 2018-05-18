@@ -104,13 +104,9 @@ class SplashFragment() : Fragment() {
                     with(atCs) {
                         visibility = android.view.View.VISIBLE
                         alpha = 0.0f
-                        animate()
-                                .alpha(it.first)
+                        animate().alpha(it.first)
                                 .setDuration(it.second)
-                                .withEndAction {
-                                    ++completedAnimationPhases
-                                }
-
+                        ++completedAnimationPhases
                     }
                 }
             })
