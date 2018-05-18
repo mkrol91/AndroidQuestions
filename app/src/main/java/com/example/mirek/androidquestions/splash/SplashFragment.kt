@@ -36,6 +36,7 @@ class SplashFragment() : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.i("animationFlowDebug", "completedAnimationPhases: " + completedAnimationPhases)
         if (savedInstanceState != null) {
             completedAnimationPhases = savedInstanceState.get(COMPLETED_ANIMATION_PHASES) as Int
             if (completedAnimationPhases > 0) {
@@ -46,10 +47,8 @@ class SplashFragment() : Fragment() {
                         Log.i("animationFlowDebug", "applying constraints from layout [ " + layout + " ]" + " (view restored)")
                         clone(activity, layout)
                     }.applyTo(splash_root)
-                    if (layout == R.layout.splash_fragment_explosion) {
-                        explosion.visibility = View.GONE
-                    }
                     when (completedAnimationPhases) {
+                        4 -> explosion.visibility = View.GONE
                         5, 6 -> atCs.visibility = View.VISIBLE
                     }
                 }
@@ -88,9 +87,9 @@ class SplashFragment() : Fragment() {
                             .setDuration(duration)
                             .withEndAction {
                                 //TODO: Shouldn't it go to ViewModel? And if so - how to do this?
-                                ++completedAnimationPhases
                                 emitter.onComplete()
                             }
+                    ++completedAnimationPhases
                 }
             })
             it.changeConstraintsCommand.observe(this, Observer {

@@ -88,10 +88,11 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
                     fadeExplosionCommand.value = Triple(0f, 200, it)
                 },
                 Completable.create {
-                    Log.i("animationFlowDebug", "@CS animation" + getlayoutForPhase(3))
+                    Log.i("animationFlowDebug", "change constraints to splash_fragment_init phase" + getlayoutForPhase(3))
                     changeConstraintsCommand.value = Pair(getlayoutForPhase(3), it)
                 },
                 Completable.create {
+                    Log.i("animationFlowDebug", "showing @CS animation")
                     fadeAtCsCommand.value = Triple(1f, 5000, it)
                 }
         )
@@ -113,6 +114,7 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
                 }
 
                 override fun onTransitionResume(transition: Transition) {
+                    Log.i("animationFlowDebug", "transitionResume: " + transition.duration)
                 }
 
                 override fun onTransitionPause(transition: Transition) {
