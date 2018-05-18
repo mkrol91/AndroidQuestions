@@ -49,6 +49,9 @@ class SplashFragment() : Fragment() {
                     if (layout == R.layout.splash_fragment_explosion) {
                         explosion.visibility = View.GONE
                     }
+                    when (completedAnimationPhases) {
+                        5, 6 -> atCs.visibility = View.VISIBLE
+                    }
                 }
             }
         }
@@ -85,6 +88,7 @@ class SplashFragment() : Fragment() {
                             .setDuration(duration)
                             .withEndAction {
                                 //TODO: Shouldn't it go to ViewModel? And if so - how to do this?
+                                ++completedAnimationPhases
                                 emitter.onComplete()
                             }
                 }
@@ -92,6 +96,7 @@ class SplashFragment() : Fragment() {
             it.changeConstraintsCommand.observe(this, Observer {
                 it?.let {
                     syncConstraintWithoutAnimation()
+                    ++completedAnimationPhases
                     it.second.onComplete()
                 }
             })
@@ -102,7 +107,11 @@ class SplashFragment() : Fragment() {
                         alpha = 0.0f
                         animate()
                                 .alpha(it.first)
-                                .duration = it.second
+                                .setDuration(it.second)
+                                .withEndAction {
+                                    ++completedAnimationPhases
+                                }
+
                     }
                 }
             })

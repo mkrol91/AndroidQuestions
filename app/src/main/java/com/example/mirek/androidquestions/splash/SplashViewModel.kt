@@ -55,12 +55,14 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
                 arrayListOf(R.layout.splash_fragment_only_title,
                         R.layout.splash_fragment_rocket,
                         R.layout.splash_fragment_explosion,
+                        R.layout.splash_fragment_explosion,
+                        R.layout.splash_fragment_initial_empty,
                         R.layout.splash_fragment_initial_empty)
 
         if (animationPhase < animationPhases.size) {
             return animationPhases[animationPhase]
         } else {
-            return R.layout.splash_fragment_explosion
+            return animationPhases.last()
         }
     }
 
@@ -87,14 +89,7 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
                 },
                 Completable.create {
                     Log.i("animationFlowDebug", "@CS animation" + getlayoutForPhase(3))
-                    changeConstraintsCommand.value = Pair(getlayoutForPhase(3),it)
-
-
-//                    fadeExplosionCommand.value = Triple(R.layout.splash_fragment_initial_empty,)
-                    //Triple(0f)
-//
-//
-
+                    changeConstraintsCommand.value = Pair(getlayoutForPhase(3), it)
                 },
                 Completable.create {
                     fadeAtCsCommand.value = Triple(1f, 5000, it)
