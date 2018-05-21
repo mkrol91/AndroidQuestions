@@ -24,12 +24,6 @@ class SplashFragment() : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val root = inflater.inflate(R.layout.splash_fragment_initial_empty, container, false)
-        Log.i("animationFlowDebug", "---animation layout ids------------------------------------------------------------------------------------------------------------------------")
-        Log.i("animationFlowDebug", "splash_fragment_initial_empty: " + R.layout.splash_fragment_initial_empty)
-        Log.i("animationFlowDebug", "splash_fragment_only_title: " + R.layout.splash_fragment_only_title)
-        Log.i("animationFlowDebug", "splash_fragment_rocket: " + R.layout.splash_fragment_rocket)
-        Log.i("animationFlowDebug", "splash_fragment_explosion: " + R.layout.splash_fragment_explosion)
-        Log.i("animationFlowDebug", "--------------------------")
         viewDataBinding = SplashFragmentInitialEmptyBinding.bind(root).apply {
             viewmodel = (activity as SplashActivity).obtainViewModel()
         }
@@ -39,7 +33,6 @@ class SplashFragment() : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.i("animationFlowDebug", "completedAnimationPhases: " + completedAnimationPhases)
         if (savedInstanceState != null) {
             completedAnimationPhases = savedInstanceState.get(COMPLETED_ANIMATION_PHASES) as Int
             if (completedAnimationPhases > 0) {
@@ -58,8 +51,7 @@ class SplashFragment() : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        viewDataBinding.viewmodel?.run {
-            Log.i("animationFlowDebug", "startAnimation, completedAnimationPhases: " + completedAnimationPhases)
+        splashViewModel {
             startAnimation(completedAnimationPhases)
         }
     }
@@ -81,7 +73,7 @@ class SplashFragment() : Fragment() {
     private fun syncConstraintsWithLayout(@IdRes layoutId: Int?) {
         if (layoutId != null)
             ConstraintSet().apply {
-                viewDataBinding.viewmodel?.run {
+                splashViewModel {
                     clone(activity, layoutId)
                 }
             }.applyTo(splash_root)
