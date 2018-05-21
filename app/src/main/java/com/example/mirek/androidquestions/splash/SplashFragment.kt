@@ -65,8 +65,7 @@ class SplashFragment() : Fragment() {
         viewDataBinding.viewmodel?.let {
             it.changeBoundsAnimationCommand.observe(this, Observer {
                 it?.let {
-                    val (layoutId, changeBounds) = it
-                    syncConstraintWithAnimation(changeBounds)
+                    syncConstraintWithAnimation(it)
                     ++completedAnimationPhases;
                 }
             })

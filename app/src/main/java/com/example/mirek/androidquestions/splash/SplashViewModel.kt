@@ -21,7 +21,7 @@ import io.reactivex.disposables.CompositeDisposable
 
 class SplashViewModel(context: Application, repository: DataRepository) : AndroidViewModel(context) {
 
-    var changeBoundsAnimationCommand = SingleLiveEvent<Pair<Int, ChangeBounds>>()
+    var changeBoundsAnimationCommand = SingleLiveEvent<ChangeBounds>()
     var fadeExplosionCommand = SingleLiveEvent<Triple<Float, Long, CompletableEmitter>>()
     var fadeAtCsCommand = SingleLiveEvent<Triple<Float, Long, CompletableEmitter>>()
     var changeConstraintsCommand = SingleLiveEvent<Pair<@IdRes Int, CompletableEmitter>>()
@@ -74,18 +74,15 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
         return arrayListOf(
                 Completable.create {
                     Log.i("animationFlowDebug", "animate to splash_fragment_only_title")
-                    changeBoundsAnimationCommand.value = Pair(getlayoutForPhase(0),
-                            changeBoundsTransition(500, AccelerateInterpolator(), it))
+                    changeBoundsAnimationCommand.value = changeBoundsTransition(500, AccelerateInterpolator(), it)
                 },
                 Completable.create {
                     Log.i("animationFlowDebug", "animate to splash_fragment_rocket")
-                    changeBoundsAnimationCommand.value = Pair(getlayoutForPhase(1),
-                            changeBoundsTransition(2000, AccelerateInterpolator(), it))
+                    changeBoundsAnimationCommand.value = changeBoundsTransition(2000, AccelerateInterpolator(), it)
                 },
                 Completable.create {
                     Log.i("animationFlowDebug", "animate to splash_fragment_explosion")
-                    changeBoundsAnimationCommand.value = Pair(getlayoutForPhase(2),
-                            changeBoundsTransition(200, OvershootInterpolator(), it))
+                    changeBoundsAnimationCommand.value = changeBoundsTransition(200, OvershootInterpolator(), it)
                 },
                 Completable.create {
                     Log.i("animationFlowDebug", "fade explosion animation")
