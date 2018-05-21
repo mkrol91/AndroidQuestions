@@ -7,7 +7,6 @@ import android.support.constraint.ConstraintSet
 import android.support.transition.ChangeBounds
 import android.support.transition.TransitionManager
 import android.support.v4.app.Fragment
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -64,7 +63,6 @@ class SplashFragment() : Fragment() {
             fadeExplosionCommand()
             incCompletedAnimationPhases()
             fadeAtCsCommand()
-            rootConstraintsChangedCommand()
             explosionVisibilityChanged()
             atCsVisibilityChanged()
         }
@@ -100,15 +98,6 @@ class SplashFragment() : Fragment() {
     private fun SplashViewModel.explosionVisibilityChanged() {
         explosionVisibilityChanged {
             explosion.visibility = it
-        }
-    }
-
-    private fun SplashViewModel.rootConstraintsChangedCommand() {
-        rootConstraintsChangedCommand {
-            ConstraintSet().apply {
-                Log.i("animationFlowDebug", "applying constraints from layout [ " + it + " ]" + " (view restored)")
-                clone(activity, it)
-            }.applyTo(splash_root)
         }
     }
 
@@ -197,14 +186,6 @@ class SplashFragment() : Fragment() {
     }
 
     fun SplashViewModel.fadeAtCsCommand(block: (Triple<Float, Long, CompletableEmitter>) -> Unit) = fadeAtCsCommand.also {
-        it.observe(this@SplashFragment, Observer {
-            if (it != null) {
-                block(it)
-            }
-        })
-    }
-
-    private fun SplashViewModel.rootConstraintsChangedCommand(block: (Int) -> Unit) = rootConstraintsChangedCommand.also {
         it.observe(this@SplashFragment, Observer {
             if (it != null) {
                 block(it)

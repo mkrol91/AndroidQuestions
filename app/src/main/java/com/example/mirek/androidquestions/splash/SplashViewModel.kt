@@ -6,7 +6,6 @@ import android.arch.lifecycle.AndroidViewModel
 import android.os.Handler
 import android.support.transition.ChangeBounds
 import android.support.transition.Transition
-import android.util.Log
 import android.view.View
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.OvershootInterpolator
@@ -23,7 +22,6 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
     var changeBoundsAnimationCommand = SingleLiveEvent<ChangeBounds>()
     var fadeExplosionCommand = SingleLiveEvent<Triple<Float, Long, CompletableEmitter>>()
     var fadeAtCsCommand = SingleLiveEvent<Triple<Float, Long, CompletableEmitter>>()
-    var rootConstraintsChangedCommand = SingleLiveEvent<Int>()
     var explosionVisibilityChanged = SingleLiveEvent<Int>()
     var atCsVisibilityChanged = SingleLiveEvent<Int>()
     var setNewConstraintsCommand = SingleLiveEvent<Int>()
@@ -38,11 +36,7 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
                     splashAnimations().drop(completedAnimationPhases))
                     .subscribeOn(AndroidSchedulers.mainThread())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe({
-                        Log.i("abcd", "success")
-                    }, {
-                        Log.i("abcd", "error:" + it)
-                    }))
+                    .subscribe({}, {}))
         }
     }
 
@@ -74,30 +68,24 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
     private fun splashAnimations(): ArrayList<Completable> {
         return arrayListOf(
                 Completable.create {
-                    Log.i("animationFlowDebug", "animate to splash_fragment_only_title")
                     changeBoundsAnimationCommand.value = changeBoundsTransition(500, AccelerateInterpolator(), it)
                 },
                 Completable.create {
-                    Log.i("animationFlowDebug", "animate to splash_fragment_rocket")
                     changeBoundsAnimationCommand.value = changeBoundsTransition(2000, AccelerateInterpolator(), it)
                 },
                 Completable.create {
-                    Log.i("animationFlowDebug", "animate to splash_fragment_explosion")
                     changeBoundsAnimationCommand.value = changeBoundsTransition(200, OvershootInterpolator(), it)
                 },
                 Completable.create {
-                    Log.i("animationFlowDebug", "fade explosion animation")
                     fadeExplosionCommand.value = Triple(0f, 200, it)
                     incCompletedAnimationPhases.call()
                 },
                 Completable.create {
-                    Log.i("animationFlowDebug", "change constraints to splash_fragment_init phase")
                     nextPhaseConstraints.call()
                     incCompletedAnimationPhases.call()
                     it.onComplete()
                 },
                 Completable.create {
-                    Log.i("animationFlowDebug", "showing @CS animation")
                     fadeAtCsCommand.value = Triple(1f, 5000, it)
                     incCompletedAnimationPhases.call()
                 }
@@ -121,7 +109,6 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
                 }
 
                 override fun onTransitionResume(transition: Transition) {
-                    Log.i("animationFlowDebug", "transitionResume: " + transition.duration)
                 }
 
                 override fun onTransitionPause(transition: Transition) {
@@ -137,7 +124,7 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
     }
 
     fun restoreConstraintsInAnimationPhase(completedAnimationPhases: Int) {
-        rootConstraintsChangedCommand.value = getlayoutForPhase(completedAnimationPhases - 1)
+        setNewConstraintsCommand.value = getlayoutForPhase(completedAnimationPhases - 1)
     }
 
     fun restoreViewsVisibilityInAnimationPhase(completedAnimationPhases: Int) {
