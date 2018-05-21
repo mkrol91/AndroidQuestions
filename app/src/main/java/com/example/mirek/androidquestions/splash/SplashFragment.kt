@@ -12,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.mirek.androidquestions.R
+import com.example.mirek.androidquestions.SingleLiveEvent
 import com.example.mirek.androidquestions.databinding.SplashFragmentInitialEmptyBinding
 import kotlinx.android.synthetic.main.splash_fragment_initial_empty.*
 
@@ -62,25 +63,32 @@ class SplashFragment() : Fragment() {
         }
     }
 
+    fun splashViewModel(block: SplashViewModel.() -> Unit): SplashViewModel? = viewDataBinding.viewmodel?.also(block)
+
+    private fun SplashViewModel.setNewConstraintsCommand(block: (Int?) -> Unit): SingleLiveEvent<Int>? = setNewConstraintsCommand.also {
+        it.observe(this@SplashFragment, Observer {
+            block(it)
+        })
+    }
+
     private fun setupAnimations() {
-        viewDataBinding.viewmodel?.let {
-            it.setNewConstraintsCommand.observe(this, Observer {
-                it?.let {
-                    syncConstraintsWithLayout(it)
-                }
-            })
-            it.nextPhaseConstraints.observe(this, Observer {
+
+        splashViewModel {
+            setNewConstraintsCommand {
+                syncConstraintsWithLayout(it)
+            }
+            nextPhaseConstraints.observe(this@SplashFragment, Observer {
                 viewDataBinding.viewmodel?.run {
                     syncConstraintsWithLayout(getlayoutForPhase(completedAnimationPhases))
                 }
             })
-            it.changeBoundsAnimationCommand.observe(this, Observer {
+            changeBoundsAnimationCommand.observe(this@SplashFragment, Observer {
                 it?.let {
                     syncConstraintWithAnimation(it)
                     ++completedAnimationPhases;
                 }
             })
-            it.fadeExplosionCommand.observe(this, Observer {
+            fadeExplosionCommand.observe(this@SplashFragment, Observer {
                 it?.let {
                     val (alpha, duration, emitter) = it
                     explosion.animate()
@@ -93,7 +101,7 @@ class SplashFragment() : Fragment() {
                     ++completedAnimationPhases
                 }
             })
-            it.fadeAtCsCommand.observe(this, Observer {
+            fadeAtCsCommand.observe(this@SplashFragment, Observer {
                 it?.let {
                     with(atCs) {
                         visibility = android.view.View.VISIBLE
@@ -104,7 +112,7 @@ class SplashFragment() : Fragment() {
                     }
                 }
             })
-            it.rootConstraintsChangedCommand.observe(this, Observer {
+            rootConstraintsChangedCommand.observe(this@SplashFragment, Observer {
                 it?.let {
                     ConstraintSet().apply {
                         Log.i("animationFlowDebug", "applying constraints from layout [ " + it + " ]" + " (view restored)")
@@ -112,28 +120,28 @@ class SplashFragment() : Fragment() {
                     }.applyTo(splash_root)
                 }
             })
-            it.explosionVisibilityChanged.observe(this, Observer {
+            explosionVisibilityChanged.observe(this@SplashFragment, Observer {
                 //TODO: replace with databinding ? probably not...
                 it?.let {
                     explosion.visibility = it
                 }
             })
-            it.atCsVisibilityChanged.observe(this, Observer {
+            atCsVisibilityChanged.observe(this@SplashFragment, Observer {
                 //TODO: replace with databinding ? probably not...
                 it?.let {
                     atCs.visibility = it
                 }
             })
-
         }
     }
 
-    private fun syncConstraintsWithLayout(@IdRes layoutId: Int) {
-        ConstraintSet().apply {
-            viewDataBinding.viewmodel?.run {
-                clone(activity, layoutId)
-            }
-        }.applyTo(splash_root)
+    private fun syncConstraintsWithLayout(@IdRes layoutId: Int?) {
+        if (layoutId != null)
+            ConstraintSet().apply {
+                viewDataBinding.viewmodel?.run {
+                    clone(activity, layoutId)
+                }
+            }.applyTo(splash_root)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
