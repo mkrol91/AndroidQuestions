@@ -41,11 +41,8 @@ class SplashFragment() : Fragment() {
             completedAnimationPhases = savedInstanceState.get(COMPLETED_ANIMATION_PHASES) as Int
             if (completedAnimationPhases > 0) {
                 viewDataBinding.viewmodel?.run {
-                    restoreLayoutInAnimationPhase(completedAnimationPhases)
-                    when (completedAnimationPhases) {
-                        4 -> explosion.visibility = View.GONE
-                        5, 6 -> atCs.visibility = View.VISIBLE
-                    }
+                    restoreConstraintsInAnimationPhase(completedAnimationPhases)
+                    restoreViewsVisibilityInAnimationPhase(completedAnimationPhases)
                 }
             }
         }
@@ -113,6 +110,19 @@ class SplashFragment() : Fragment() {
                     }.applyTo(splash_root)
                 }
             })
+            it.explosionVisibilityChanged.observe(this, Observer {
+                //TODO: replace with databinding
+                it?.let {
+                    explosion.visibility = it
+                }
+            })
+            it.atCsVisibilityChanged.observe(this, Observer {
+                //TODO: replace with databinding
+                it?.let {
+                    atCs.visibility = it
+                }
+            })
+
         }
     }
 

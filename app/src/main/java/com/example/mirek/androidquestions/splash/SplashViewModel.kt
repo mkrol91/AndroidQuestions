@@ -8,6 +8,7 @@ import android.support.annotation.IdRes
 import android.support.transition.ChangeBounds
 import android.support.transition.Transition
 import android.util.Log
+import android.view.View
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import com.example.mirek.androidquestions.R
@@ -25,6 +26,8 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
     var fadeAtCsCommand = SingleLiveEvent<Triple<Float, Long, CompletableEmitter>>()
     var changeConstraintsCommand = SingleLiveEvent<Pair<@IdRes Int, CompletableEmitter>>()
     var rootConstraintsChangedCommand = SingleLiveEvent<Int>()
+    var explosionVisibilityChanged = SingleLiveEvent<Int>()
+    var atCsVisibilityChanged = SingleLiveEvent<Int>()
 
     private var disposables = CompositeDisposable()
 
@@ -130,8 +133,15 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
         }
     }
 
-    fun restoreLayoutInAnimationPhase(completedAnimationPhases: Int) {
+    fun restoreConstraintsInAnimationPhase(completedAnimationPhases: Int) {
         rootConstraintsChangedCommand.value = getlayoutForPhase(completedAnimationPhases - 1)
+    }
+
+    fun restoreViewsVisibilityInAnimationPhase(completedAnimationPhases: Int) {
+        when (completedAnimationPhases) {
+            4 -> explosionVisibilityChanged.value = View.GONE
+            5, 6 -> atCsVisibilityChanged.value = View.VISIBLE
+        }
     }
 
 }
