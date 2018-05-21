@@ -111,13 +111,13 @@ class SplashFragment() : Fragment() {
                 }
             })
             it.explosionVisibilityChanged.observe(this, Observer {
-                //TODO: replace with databinding
+                //TODO: replace with databinding ? probably not...
                 it?.let {
                     explosion.visibility = it
                 }
             })
             it.atCsVisibilityChanged.observe(this, Observer {
-                //TODO: replace with databinding
+                //TODO: replace with databinding ? probably not...
                 it?.let {
                     atCs.visibility = it
                 }
