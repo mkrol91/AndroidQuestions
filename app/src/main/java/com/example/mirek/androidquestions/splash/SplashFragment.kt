@@ -43,7 +43,7 @@ class SplashFragment() : Fragment() {
         if (savedInstanceState != null) {
             completedAnimationPhases = savedInstanceState.get(COMPLETED_ANIMATION_PHASES) as Int
             if (completedAnimationPhases > 0) {
-                viewDataBinding.viewmodel?.run {
+                splashViewModel {
                     restoreConstraintsInAnimationPhase(completedAnimationPhases)
                     restoreViewsVisibilityInAnimationPhase(completedAnimationPhases)
                 }
@@ -53,7 +53,7 @@ class SplashFragment() : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        setupAnimations()
+        setupActionsForFragment()
     }
 
     override fun onResume() {
@@ -64,54 +64,16 @@ class SplashFragment() : Fragment() {
         }
     }
 
-    fun splashViewModel(block: SplashViewModel.() -> Unit) = viewDataBinding.viewmodel?.also(block)
-
-    private fun setupAnimations() {
+    private fun setupActionsForFragment() {
         splashViewModel {
-            setNewConstraintsCommand {
-                syncConstraintsWithLayout(it)
-            }
-            nextPhaseConstraints {
-                syncConstraintsWithLayout(getlayoutForPhase(completedAnimationPhases))
-            }
-            changeBoundsAnimationCommand {
-                syncConstraintWithAnimation(it)
-                ++completedAnimationPhases
-            }
-            fadeExplosionCommand {
-                if (it != null) {
-                    val (alpha, duration, emitter) = it
-                    explosion.animate()
-                            .alpha(alpha)
-                            .setDuration(duration)
-                            .withEndAction {
-                                //TODO: Shouldn't it go to ViewModel? And if so - how to do this?
-                                emitter.onComplete()
-                            }
-                    ++completedAnimationPhases
-                }
-            }
-            fadeAtCsCommand {
-                with(atCs) {
-                    visibility = android.view.View.VISIBLE
-                    alpha = 0.0f
-                    animate().alpha(it.first)
-                            .setDuration(it.second)
-                    ++completedAnimationPhases
-                }
-            }
-            rootConstraintsChangedCommand {
-                ConstraintSet().apply {
-                    Log.i("animationFlowDebug", "applying constraints from layout [ " + it + " ]" + " (view restored)")
-                    clone(activity, it)
-                }.applyTo(splash_root)
-            }
-            explosionVisibilityChanged {
-                explosion.visibility = it
-            }
-            atCsVisibilityChanged {
-                atCs.visibility = it
-            }
+            setNewConstraints()
+            nextPhaseConstraints()
+            changeBoundsAnimationCommand()
+            fadeExplosionCommand()
+            fadeAtCsCommand()
+            rootConstraintsChangedCommand()
+            explosionVisibilityChanged()
+            atCsVisibilityChanged()
         }
     }
 
@@ -136,6 +98,74 @@ class SplashFragment() : Fragment() {
         }
     }
 
+    private fun SplashViewModel.atCsVisibilityChanged() {
+        atCsVisibilityChanged {
+            atCs.visibility = it
+        }
+    }
+
+    private fun SplashViewModel.explosionVisibilityChanged() {
+        explosionVisibilityChanged {
+            explosion.visibility = it
+        }
+    }
+
+    private fun SplashViewModel.rootConstraintsChangedCommand() {
+        rootConstraintsChangedCommand {
+            ConstraintSet().apply {
+                Log.i("animationFlowDebug", "applying constraints from layout [ " + it + " ]" + " (view restored)")
+                clone(activity, it)
+            }.applyTo(splash_root)
+        }
+    }
+
+    private fun SplashViewModel.fadeAtCsCommand() {
+        fadeAtCsCommand {
+            with(atCs) {
+                visibility = View.VISIBLE
+                alpha = 0.0f
+                animate().alpha(it.first)
+                        .setDuration(it.second)
+                ++completedAnimationPhases
+            }
+        }
+    }
+
+    private fun SplashViewModel.fadeExplosionCommand() {
+        fadeExplosionCommand {
+            if (it != null) {
+                val (alpha, duration, emitter) = it
+                explosion.animate()
+                        .alpha(alpha)
+                        .setDuration(duration)
+                        .withEndAction {
+                            //TODO: Shouldn't it go to ViewModel? And if so - how to do this?
+                            emitter.onComplete()
+                        }
+                ++completedAnimationPhases
+            }
+        }
+    }
+
+    private fun SplashViewModel.changeBoundsAnimationCommand() {
+        changeBoundsAnimationCommand {
+            syncConstraintWithAnimation(it)
+            ++completedAnimationPhases
+        }
+    }
+
+    private fun SplashViewModel.nextPhaseConstraints() {
+        nextPhaseConstraints {
+            syncConstraintsWithLayout(getlayoutForPhase(completedAnimationPhases))
+        }
+    }
+
+    private fun SplashViewModel.setNewConstraints() {
+        setNewConstraintsCommand {
+            syncConstraintsWithLayout(it)
+        }
+    }
+
     companion object {
         private val COMPLETED_ANIMATION_PHASES: String = "COMPLETED_ANIMATION_PHASES"
 
@@ -144,6 +174,7 @@ class SplashFragment() : Fragment() {
         }
     }
 
+    fun splashViewModel(block: SplashViewModel.() -> Unit) = viewDataBinding.viewmodel?.let(block)
 
     private fun SplashViewModel.setNewConstraintsCommand(block: (Int?) -> Unit): SingleLiveEvent<Int>? = setNewConstraintsCommand.also {
         it.observe(this@SplashFragment, Observer {
