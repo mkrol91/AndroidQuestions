@@ -41,12 +41,7 @@ class SplashFragment() : Fragment() {
             completedAnimationPhases = savedInstanceState.get(COMPLETED_ANIMATION_PHASES) as Int
             if (completedAnimationPhases > 0) {
                 viewDataBinding.viewmodel?.run {
-                    val layout = getlayoutForPhase(completedAnimationPhases - 1)
-                    //when user rotate screen during explosion, after rotation it should'n appear
-                    ConstraintSet().apply {
-                        Log.i("animationFlowDebug", "applying constraints from layout [ " + layout + " ]" + " (view restored)")
-                        clone(activity, layout)
-                    }.applyTo(splash_root)
+                    restoreLayoutInAnimationPhase(completedAnimationPhases)
                     when (completedAnimationPhases) {
                         4 -> explosion.visibility = View.GONE
                         5, 6 -> atCs.visibility = View.VISIBLE
@@ -108,6 +103,14 @@ class SplashFragment() : Fragment() {
                                 .setDuration(it.second)
                         ++completedAnimationPhases
                     }
+                }
+            })
+            it.rootConstraintsChangedCommand.observe(this, Observer {
+                it?.let {
+                    ConstraintSet().apply {
+                        Log.i("animationFlowDebug", "applying constraints from layout [ " + it + " ]" + " (view restored)")
+                        clone(activity, it)
+                    }.applyTo(splash_root)
                 }
             })
         }

@@ -24,6 +24,7 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
     var fadeExplosionCommand = SingleLiveEvent<Triple<Float, Long, CompletableEmitter>>()
     var fadeAtCsCommand = SingleLiveEvent<Triple<Float, Long, CompletableEmitter>>()
     var changeConstraintsCommand = SingleLiveEvent<Pair<@IdRes Int, CompletableEmitter>>()
+    var rootConstraintsChangedCommand = SingleLiveEvent<Int>()
 
     private var disposables = CompositeDisposable()
 
@@ -127,6 +128,10 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
                 }
             })
         }
+    }
+
+    fun restoreLayoutInAnimationPhase(completedAnimationPhases: Int) {
+        rootConstraintsChangedCommand.value = getlayoutForPhase(completedAnimationPhases - 1)
     }
 
 }
