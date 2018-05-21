@@ -4,7 +4,6 @@ import android.animation.TimeInterpolator
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.os.Handler
-import android.support.annotation.IdRes
 import android.support.transition.ChangeBounds
 import android.support.transition.Transition
 import android.util.Log
@@ -29,6 +28,7 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
     var atCsVisibilityChanged = SingleLiveEvent<Int>()
     var setNewConstraintsCommand = SingleLiveEvent<Int>()
     var nextPhaseConstraints = SingleLiveEvent<Nothing>()
+    var incCompletedAnimationPhases = SingleLiveEvent<Nothing>()
 
     private var disposables = CompositeDisposable()
 
@@ -88,6 +88,7 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
                 Completable.create {
                     Log.i("animationFlowDebug", "fade explosion animation")
                     fadeExplosionCommand.value = Triple(0f, 200, it)
+                    incCompletedAnimationPhases.call()
                 },
                 Completable.create {
                     Log.i("animationFlowDebug", "change constraints to splash_fragment_init phase")

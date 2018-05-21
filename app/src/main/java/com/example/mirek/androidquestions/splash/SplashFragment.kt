@@ -70,6 +70,7 @@ class SplashFragment() : Fragment() {
             nextPhaseConstraints()
             changeBoundsAnimationCommand()
             fadeExplosionCommand()
+            incCompletedAnimationPhases()
             fadeAtCsCommand()
             rootConstraintsChangedCommand()
             explosionVisibilityChanged()
@@ -142,7 +143,6 @@ class SplashFragment() : Fragment() {
                             //TODO: Shouldn't it go to ViewModel? And if so - how to do this?
                             emitter.onComplete()
                         }
-                ++completedAnimationPhases
             }
         }
     }
@@ -163,6 +163,12 @@ class SplashFragment() : Fragment() {
     private fun SplashViewModel.setNewConstraints() {
         setNewConstraintsCommand {
             syncConstraintsWithLayout(it)
+        }
+    }
+
+    private fun SplashViewModel.incCompletedAnimationPhases() {
+        incCompletedAnimationPhases {
+            ++completedAnimationPhases
         }
     }
 
@@ -229,6 +235,12 @@ class SplashFragment() : Fragment() {
             if (it != null) {
                 block(it)
             }
+        })
+    }
+
+    private fun SplashViewModel.incCompletedAnimationPhases(block: () -> Unit) = incCompletedAnimationPhases.also {
+        it.observe(this@SplashFragment, Observer {
+            block()
         })
     }
 }
