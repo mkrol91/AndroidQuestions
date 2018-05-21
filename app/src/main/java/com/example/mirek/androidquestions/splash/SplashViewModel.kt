@@ -93,11 +93,13 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
                 Completable.create {
                     Log.i("animationFlowDebug", "change constraints to splash_fragment_init phase")
                     nextPhaseConstraints.call()
+                    incCompletedAnimationPhases.call()
                     it.onComplete()
                 },
                 Completable.create {
                     Log.i("animationFlowDebug", "showing @CS animation")
                     fadeAtCsCommand.value = Triple(1f, 5000, it)
+                    incCompletedAnimationPhases.call()
                 }
         )
     }
@@ -114,6 +116,7 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
             interpolator = interpolatorType
             addListener(object : Transition.TransitionListener {
                 override fun onTransitionEnd(transition: Transition) {
+                    incCompletedAnimationPhases.call()
                     emitter.onComplete()
                 }
 

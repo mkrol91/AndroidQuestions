@@ -127,7 +127,6 @@ class SplashFragment() : Fragment() {
                 alpha = 0.0f
                 animate().alpha(it.first)
                         .setDuration(it.second)
-                ++completedAnimationPhases
             }
         }
     }
@@ -150,7 +149,6 @@ class SplashFragment() : Fragment() {
     private fun SplashViewModel.changeBoundsAnimationCommand() {
         changeBoundsAnimationCommand {
             syncConstraintWithAnimation(it)
-            ++completedAnimationPhases
         }
     }
 
