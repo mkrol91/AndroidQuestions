@@ -66,22 +66,20 @@ class SplashFragment() : Fragment() {
         viewDataBinding.viewmodel?.let {
             it.setNewConstraintsCommand.observe(this, Observer {
                 it?.let {
-                    ConstraintSet().apply {
-                        viewDataBinding.viewmodel?.run {
-                            clone(activity, it)
-                        }
-                    }.applyTo(splash_root)
+                    syncConstraintsWithLayout(it)
                 }
             })
-        }
-        viewDataBinding.viewmodel?.let {
+            it.nextPhaseConstraints.observe(this, Observer {
+                viewDataBinding.viewmodel?.run {
+                    syncConstraintsWithLayout(getlayoutForPhase(completedAnimationPhases))
+                }
+            })
             it.changeBoundsAnimationCommand.observe(this, Observer {
                 it?.let {
                     syncConstraintWithAnimation(it)
                     ++completedAnimationPhases;
                 }
             })
-
             it.fadeExplosionCommand.observe(this, Observer {
                 it?.let {
                     val (alpha, duration, emitter) = it
@@ -93,11 +91,6 @@ class SplashFragment() : Fragment() {
                                 emitter.onComplete()
                             }
                     ++completedAnimationPhases
-                }
-            })
-            it.nextPhaseConstraints.observe(this, Observer {
-                viewDataBinding.viewmodel?.run {
-                    syncConstraintsWithLayout(getlayoutForPhase(completedAnimationPhases))
                 }
             })
             it.fadeAtCsCommand.observe(this, Observer {
