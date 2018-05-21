@@ -24,11 +24,11 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
     var changeBoundsAnimationCommand = SingleLiveEvent<ChangeBounds>()
     var fadeExplosionCommand = SingleLiveEvent<Triple<Float, Long, CompletableEmitter>>()
     var fadeAtCsCommand = SingleLiveEvent<Triple<Float, Long, CompletableEmitter>>()
-    var changeConstraintsCommand = SingleLiveEvent<Pair<@IdRes Int, CompletableEmitter>>()
     var rootConstraintsChangedCommand = SingleLiveEvent<Int>()
     var explosionVisibilityChanged = SingleLiveEvent<Int>()
     var atCsVisibilityChanged = SingleLiveEvent<Int>()
     var setNewConstraintsCommand = SingleLiveEvent<Int>()
+    var nextPhaseConstraints = SingleLiveEvent<Nothing>()
 
     private var disposables = CompositeDisposable()
 
@@ -90,8 +90,9 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
                     fadeExplosionCommand.value = Triple(0f, 200, it)
                 },
                 Completable.create {
-                    Log.i("animationFlowDebug", "change constraints to splash_fragment_init phase" + getlayoutForPhase(3))
-                    changeConstraintsCommand.value = Pair(getlayoutForPhase(3), it)
+                    Log.i("animationFlowDebug", "change constraints to splash_fragment_init phase")
+                    nextPhaseConstraints.call()
+                    it.onComplete()
                 },
                 Completable.create {
                     Log.i("animationFlowDebug", "showing @CS animation")

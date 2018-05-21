@@ -2,6 +2,7 @@ package com.example.mirek.androidquestions.splash
 
 import android.arch.lifecycle.Observer
 import android.os.Bundle
+import android.support.annotation.IdRes
 import android.support.constraint.ConstraintSet
 import android.support.transition.ChangeBounds
 import android.support.transition.TransitionManager
@@ -94,11 +95,9 @@ class SplashFragment() : Fragment() {
                     ++completedAnimationPhases
                 }
             })
-            it.changeConstraintsCommand.observe(this, Observer {
-                it?.let {
-                    syncConstraintWithoutAnimation()
-                    ++completedAnimationPhases
-                    it.second.onComplete()
+            it.nextPhaseConstraints.observe(this, Observer {
+                viewDataBinding.viewmodel?.run {
+                    syncConstraintsWithLayout(getlayoutForPhase(completedAnimationPhases))
                 }
             })
             it.fadeAtCsCommand.observe(this, Observer {
@@ -136,10 +135,10 @@ class SplashFragment() : Fragment() {
         }
     }
 
-    private fun syncConstraintWithoutAnimation() {
+    private fun syncConstraintsWithLayout(@IdRes layoutId: Int) {
         ConstraintSet().apply {
             viewDataBinding.viewmodel?.run {
-                clone(activity, getlayoutForPhase(completedAnimationPhases))
+                clone(activity, layoutId)
             }
         }.applyTo(splash_root)
     }
