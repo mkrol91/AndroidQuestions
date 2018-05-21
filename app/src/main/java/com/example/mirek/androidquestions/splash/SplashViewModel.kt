@@ -28,6 +28,7 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
     var rootConstraintsChangedCommand = SingleLiveEvent<Int>()
     var explosionVisibilityChanged = SingleLiveEvent<Int>()
     var atCsVisibilityChanged = SingleLiveEvent<Int>()
+    var setNewConstraintsCommand = SingleLiveEvent<Int>()
 
     private var disposables = CompositeDisposable()
 
@@ -139,6 +140,10 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
             4 -> explosionVisibilityChanged.value = View.GONE
             5, 6 -> atCsVisibilityChanged.value = View.VISIBLE
         }
+    }
+
+    fun syncConstraintsWithoutAnimation(completedAnimationPhases: Int) {
+        setNewConstraintsCommand.value = getlayoutForPhase(completedAnimationPhases)
     }
 
 }

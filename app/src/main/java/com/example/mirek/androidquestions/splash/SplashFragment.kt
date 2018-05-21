@@ -63,6 +63,17 @@ class SplashFragment() : Fragment() {
 
     private fun setupAnimations() {
         viewDataBinding.viewmodel?.let {
+            it.setNewConstraintsCommand.observe(this, Observer {
+                it?.let {
+                    ConstraintSet().apply {
+                        viewDataBinding.viewmodel?.run {
+                            clone(activity, it)
+                        }
+                    }.applyTo(splash_root)
+                }
+            })
+        }
+        viewDataBinding.viewmodel?.let {
             it.changeBoundsAnimationCommand.observe(this, Observer {
                 it?.let {
                     syncConstraintWithAnimation(it)
@@ -140,7 +151,7 @@ class SplashFragment() : Fragment() {
 
     private fun syncConstraintWithAnimation(preparedTransition: ChangeBounds) {
         TransitionManager.beginDelayedTransition(splash_root, preparedTransition)
-        syncConstraintWithoutAnimation()
+        viewDataBinding.viewmodel?.syncConstraintsWithoutAnimation(completedAnimationPhases)
     }
 
     companion object {
