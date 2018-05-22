@@ -77,10 +77,10 @@ class SplashFragment() : Fragment() {
                             }
                 }
             }
-            this@SplashFragment.onWrappedEvent(incCompletedAnimationPhases){
+            this@SplashFragment.onWrappedEvent(incCompletedAnimationPhases) {
                 ++completedAnimationPhases
             }
-            onSingleLiveEvent(this@SplashFragment, fadeAtCsCommand) {
+            this@SplashFragment.onWrappedEvent(fadeAtCsCommand) {
                 with(atCs) {
                     it?.let {
                         visibility = View.VISIBLE

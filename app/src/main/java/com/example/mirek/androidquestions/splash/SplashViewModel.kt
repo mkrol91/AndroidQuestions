@@ -23,7 +23,7 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
 
     var changeBoundsAnimationCommand = MutableLiveData<Event<ChangeBounds>>()
     val fadeExplosionCommand = MutableLiveData<Event<Triple<Float, Long, CompletableEmitter>>>()
-    var fadeAtCsCommand = SingleLiveEvent<Triple<Float, Long, CompletableEmitter>>()
+    var fadeAtCsCommand = MutableLiveData<Event<Triple<Float, Long, CompletableEmitter>>>()
     var explosionVisibilityChanged = SingleLiveEvent<Int>()
     var atCsVisibilityChanged = SingleLiveEvent<Int>()
     var setNewConstraintsCommand = MutableLiveData<Event<Int>>()
@@ -88,7 +88,7 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
                     it.onComplete()
                 },
                 Completable.create {
-                    fadeAtCsCommand.value = Triple(1f, 5000, it)
+                    fadeAtCsCommand.value = Event(Triple(1f, 5000L, it))
                     incCompletedAnimationPhases.value = Event(1)
                 }
         )
