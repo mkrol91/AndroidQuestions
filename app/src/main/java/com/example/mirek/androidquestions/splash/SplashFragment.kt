@@ -13,7 +13,6 @@ import android.view.ViewGroup
 import com.example.mirek.androidquestions.R
 import com.example.mirek.androidquestions.SingleLiveEvent
 import com.example.mirek.androidquestions.databinding.SplashFragmentInitialEmptyBinding
-import io.reactivex.CompletableEmitter
 import kotlinx.android.synthetic.main.splash_fragment_initial_empty.*
 
 class SplashFragment() : Fragment() {
@@ -90,30 +89,34 @@ class SplashFragment() : Fragment() {
     }
 
     private fun SplashViewModel.atCsVisibilityChanged() {
-        atCsVisibilityChanged {
-            atCs.visibility = it
+        onSingleLiveEvent(atCsVisibilityChanged) {
+            if (it != null)
+                atCs.visibility = it
         }
     }
 
     private fun SplashViewModel.explosionVisibilityChanged() {
-        explosionVisibilityChanged {
-            explosion.visibility = it
+        onSingleLiveEvent(explosionVisibilityChanged) {
+            if (it != null)
+                explosion.visibility = it
         }
     }
 
     private fun SplashViewModel.fadeAtCsCommand() {
-        fadeAtCsCommand {
+        onSingleLiveEvent(fadeAtCsCommand) {
             with(atCs) {
-                visibility = View.VISIBLE
-                alpha = 0.0f
-                animate().alpha(it.first)
-                        .setDuration(it.second)
+                it?.let {
+                    visibility = View.VISIBLE
+                    alpha = 0.0f
+                    animate().alpha(it.first)
+                            .setDuration(it.second)
+                }
             }
         }
     }
 
     private fun SplashViewModel.fadeExplosionCommand() {
-        fadeExplosionCommand {
+        onSingleLiveEvent(fadeExplosionCommand) {
             if (it != null) {
                 val (alpha, duration, emitter) = it
                 explosion.animate()
@@ -128,25 +131,25 @@ class SplashFragment() : Fragment() {
     }
 
     private fun SplashViewModel.changeBoundsAnimationCommand() {
-        changeBoundsAnimationCommand {
+        onSingleLiveEvent(changeBoundsAnimationCommand) {
             syncConstraintWithAnimation(it)
         }
     }
 
     private fun SplashViewModel.nextPhaseConstraints() {
-        nextPhaseConstraints {
+        onSingleLiveEvent(nextPhaseConstraints) {
             syncConstraintsWithLayout(getlayoutForPhase(completedAnimationPhases))
         }
     }
 
     private fun SplashViewModel.setNewConstraints() {
-        setNewConstraintsCommand {
+        onSingleLiveEvent(setNewConstraintsCommand) {
             syncConstraintsWithLayout(it)
         }
     }
 
     private fun SplashViewModel.incCompletedAnimationPhases() {
-        incCompletedAnimationPhases {
+        onSingleLiveEvent(incCompletedAnimationPhases) {
             ++completedAnimationPhases
         }
     }
@@ -161,58 +164,11 @@ class SplashFragment() : Fragment() {
 
     fun splashViewModel(block: SplashViewModel.() -> Unit) = viewDataBinding.viewmodel?.let(block)
 
-    private fun SplashViewModel.setNewConstraintsCommand(block: (Int?) -> Unit): SingleLiveEvent<Int>? = setNewConstraintsCommand.also {
-        it.observe(this@SplashFragment, Observer {
-            block(it)
-        })
-    }
-
-    private fun SplashViewModel.nextPhaseConstraints(block: () -> Unit): SingleLiveEvent<Nothing>? = nextPhaseConstraints.also {
-        it.observe(this@SplashFragment, Observer {
-            block()
-        })
-    }
-
-    private fun SplashViewModel.changeBoundsAnimationCommand(block: (ChangeBounds?) -> Unit) = changeBoundsAnimationCommand.also {
-        it.observe(this@SplashFragment, Observer {
-            block(it)
-        })
-    }
-
-    private fun SplashViewModel.fadeExplosionCommand(block: (Triple<Float, Long, CompletableEmitter>?) -> Unit) = fadeExplosionCommand.also {
-        it.observe(this@SplashFragment, Observer {
-            block(it)
-        })
-    }
-
-    fun SplashViewModel.fadeAtCsCommand(block: (Triple<Float, Long, CompletableEmitter>) -> Unit) = fadeAtCsCommand.also {
-        it.observe(this@SplashFragment, Observer {
-            if (it != null) {
-                block(it)
+    private fun <T> onSingleLiveEvent(event: SingleLiveEvent<T>, block: (T?) -> Unit): SingleLiveEvent<T>? =
+            event.also {
+                it.observe(this@SplashFragment, Observer {
+                    block(it)
+                })
             }
-        })
-    }
-
-    private fun SplashViewModel.explosionVisibilityChanged(block: (Int) -> Unit) = explosionVisibilityChanged.also {
-        it.observe(this@SplashFragment, Observer {
-            if (it != null) {
-                block(it)
-            }
-        })
-    }
-
-    private fun SplashViewModel.atCsVisibilityChanged(block: (Int) -> Unit) = atCsVisibilityChanged.also {
-        it.observe(this@SplashFragment, Observer {
-            if (it != null) {
-                block(it)
-            }
-        })
-    }
-
-    private fun SplashViewModel.incCompletedAnimationPhases(block: () -> Unit) = incCompletedAnimationPhases.also {
-        it.observe(this@SplashFragment, Observer {
-            block()
-        })
-    }
 }
 
