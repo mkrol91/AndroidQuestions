@@ -77,7 +77,7 @@ class SplashFragment() : Fragment() {
                             }
                 }
             }
-            onSingleLiveEvent(this@SplashFragment, incCompletedAnimationPhases) {
+            this@SplashFragment.onWrappedEvent(incCompletedAnimationPhases){
                 ++completedAnimationPhases
             }
             onSingleLiveEvent(this@SplashFragment, fadeAtCsCommand) {

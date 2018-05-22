@@ -27,8 +27,8 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
     var explosionVisibilityChanged = SingleLiveEvent<Int>()
     var atCsVisibilityChanged = SingleLiveEvent<Int>()
     var setNewConstraintsCommand = MutableLiveData<Event<Int>>()
-    var nextPhaseConstraints = MutableLiveData<Event<Nothing>>()
-    var incCompletedAnimationPhases = SingleLiveEvent<Nothing>()
+    var nextPhaseConstraints = MutableLiveData<Event<Int>>()
+    var incCompletedAnimationPhases = MutableLiveData<Event<Int>>()
 
     private var disposables = CompositeDisposable()
 
@@ -80,16 +80,16 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
                 },
                 Completable.create {
                     fadeExplosionCommand.value = Event(Triple(0f, 200L, it))
-                    incCompletedAnimationPhases.call()
+                    incCompletedAnimationPhases.value = Event(1)
                 },
                 Completable.create {
-                    nextPhaseConstraints.value = null
-                    incCompletedAnimationPhases.call()
+                    nextPhaseConstraints.value = Event(1)
+                    incCompletedAnimationPhases.value = Event(1)
                     it.onComplete()
                 },
                 Completable.create {
                     fadeAtCsCommand.value = Triple(1f, 5000, it)
-                    incCompletedAnimationPhases.call()
+                    incCompletedAnimationPhases.value = Event(1)
                 }
         )
     }
@@ -106,7 +106,7 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
             interpolator = interpolatorType
             addListener(object : Transition.TransitionListener {
                 override fun onTransitionEnd(transition: Transition) {
-                    incCompletedAnimationPhases.call()
+                    incCompletedAnimationPhases.value = Event(1)
                     emitter.onComplete()
                 }
 
