@@ -12,7 +12,6 @@ import android.view.animation.AccelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import com.example.mirek.androidquestions.Event
 import com.example.mirek.androidquestions.R
-import com.example.mirek.androidquestions.SingleLiveEvent
 import com.example.mirek.androidquestions.data.source.DataRepository
 import io.reactivex.Completable
 import io.reactivex.CompletableEmitter
@@ -24,8 +23,8 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
     var changeBoundsAnimationCommand = MutableLiveData<Event<ChangeBounds>>()
     val fadeExplosionCommand = MutableLiveData<Event<Triple<Float, Long, CompletableEmitter>>>()
     var fadeAtCsCommand = MutableLiveData<Event<Triple<Float, Long, CompletableEmitter>>>()
-    var explosionVisibilityChanged = SingleLiveEvent<Int>()
-    var atCsVisibilityChanged = SingleLiveEvent<Int>()
+    var explosionVisibilityChanged = MutableLiveData<Event<Int>>()
+    var atCsVisibilityChanged = MutableLiveData<Event<Int>>()
     var setNewConstraintsCommand = MutableLiveData<Event<Int>>()
     var nextPhaseConstraints = MutableLiveData<Event<Int>>()
     var incCompletedAnimationPhases = MutableLiveData<Event<Int>>()
@@ -131,8 +130,8 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
 
     fun restoreViewsVisibilityInAnimationPhase(completedAnimationPhases: Int) {
         when (completedAnimationPhases) {
-            4 -> explosionVisibilityChanged.value = View.GONE
-            5, 6 -> atCsVisibilityChanged.value = View.VISIBLE
+            4 -> explosionVisibilityChanged.value = Event(View.GONE)
+            5, 6 -> atCsVisibilityChanged.value = Event(View.VISIBLE)
         }
     }
 

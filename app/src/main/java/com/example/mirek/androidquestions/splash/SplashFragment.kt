@@ -11,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import com.example.mirek.androidquestions.R
 import com.example.mirek.androidquestions.databinding.SplashFragmentInitialEmptyBinding
-import com.example.mirek.androidquestions.util.onSingleLiveEvent
 import com.example.mirek.androidquestions.util.onWrappedEvent
 import kotlinx.android.synthetic.main.splash_fragment_initial_empty.*
 
@@ -90,11 +89,11 @@ class SplashFragment() : Fragment() {
                     }
                 }
             }
-            onSingleLiveEvent(this@SplashFragment, explosionVisibilityChanged) {
+            this@SplashFragment.onWrappedEvent(explosionVisibilityChanged) {
                 if (it != null)
                     explosion.visibility = it
             }
-            onSingleLiveEvent(this@SplashFragment, atCsVisibilityChanged) {
+            this@SplashFragment.onWrappedEvent(atCsVisibilityChanged) {
                 if (it != null)
                     atCs.visibility = it
             }
