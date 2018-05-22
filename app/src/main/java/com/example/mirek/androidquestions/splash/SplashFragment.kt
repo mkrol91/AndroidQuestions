@@ -55,47 +55,49 @@ class SplashFragment() : Fragment() {
 
     private fun setupActionsForFragment() {
         splashViewModel {
-            this@SplashFragment.onWrappedEvent(setNewConstraintsCommand) {
-                syncConstraintsWithLayout(it)
-            }
-            this@SplashFragment.onWrappedEvent(nextPhaseConstraints) {
-                syncConstraintsWithLayout(getlayoutForPhase(completedAnimationPhases))
-            }
-            this@SplashFragment.onWrappedEvent(changeBoundsAnimationCommand) {
-                syncConstraintWithAnimation(it)
-            }
-            this@SplashFragment.onWrappedEvent(fadeExplosionCommand) {
-                if (it != null) {
-                    val (alpha, duration, emitter) = it
-                    explosion.animate()
-                            .alpha(alpha)
-                            .setDuration(duration)
-                            .withEndAction {
-                                //TODO: Shouldn't it go to ViewModel? And if so - how to do this?
-                                emitter.onComplete()
-                            }
+            with(this@SplashFragment) {
+                onWrappedEvent(setNewConstraintsCommand) {
+                    syncConstraintsWithLayout(it)
                 }
-            }
-            this@SplashFragment.onWrappedEvent(incCompletedAnimationPhases) {
-                ++completedAnimationPhases
-            }
-            this@SplashFragment.onWrappedEvent(fadeAtCsCommand) {
-                with(atCs) {
-                    it?.let {
-                        visibility = View.VISIBLE
-                        alpha = 0.0f
-                        animate().alpha(it.first)
-                                .setDuration(it.second)
+                onWrappedEvent(nextPhaseConstraints) {
+                    syncConstraintsWithLayout(getlayoutForPhase(completedAnimationPhases))
+                }
+                onWrappedEvent(changeBoundsAnimationCommand) {
+                    syncConstraintWithAnimation(it)
+                }
+                onWrappedEvent(fadeExplosionCommand) {
+                    if (it != null) {
+                        val (alpha, duration, emitter) = it
+                        explosion.animate()
+                                .alpha(alpha)
+                                .setDuration(duration)
+                                .withEndAction {
+                                    //TODO: Shouldn't it go to ViewModel? And if so - how to do this?
+                                    emitter.onComplete()
+                                }
                     }
                 }
-            }
-            this@SplashFragment.onWrappedEvent(explosionVisibilityChanged) {
-                if (it != null)
-                    explosion.visibility = it
-            }
-            this@SplashFragment.onWrappedEvent(atCsVisibilityChanged) {
-                if (it != null)
-                    atCs.visibility = it
+                onWrappedEvent(incCompletedAnimationPhases) {
+                    ++completedAnimationPhases
+                }
+                onWrappedEvent(fadeAtCsCommand) {
+                    with(atCs) {
+                        it?.let {
+                            visibility = View.VISIBLE
+                            alpha = 0.0f
+                            animate().alpha(it.first)
+                                    .setDuration(it.second)
+                        }
+                    }
+                }
+                onWrappedEvent(explosionVisibilityChanged) {
+                    if (it != null)
+                        explosion.visibility = it
+                }
+                onWrappedEvent(atCsVisibilityChanged) {
+                    if (it != null)
+                        atCs.visibility = it
+                }
             }
         }
     }
