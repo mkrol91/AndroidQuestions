@@ -66,7 +66,7 @@ class SplashFragment() : Fragment() {
                     syncConstraintWithAnimation(it)
                 }
                 onWrappedEvent(fadeExplosionCommand) {
-                    if (it != null) {
+                    it?.let {
                         val (alpha, duration, emitter) = it
                         explosion.animate()
                                 .alpha(alpha)
