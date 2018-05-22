@@ -3,12 +3,14 @@ package com.example.mirek.androidquestions.splash
 import android.animation.TimeInterpolator
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
+import android.arch.lifecycle.MutableLiveData
 import android.os.Handler
 import android.support.transition.ChangeBounds
 import android.support.transition.Transition
 import android.view.View
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.OvershootInterpolator
+import com.example.mirek.androidquestions.Event
 import com.example.mirek.androidquestions.R
 import com.example.mirek.androidquestions.SingleLiveEvent
 import com.example.mirek.androidquestions.data.source.DataRepository
@@ -19,7 +21,7 @@ import io.reactivex.disposables.CompositeDisposable
 
 class SplashViewModel(context: Application, repository: DataRepository) : AndroidViewModel(context) {
 
-    var changeBoundsAnimationCommand = SingleLiveEvent<ChangeBounds>()
+    var changeBoundsAnimationCommand = MutableLiveData<Event<ChangeBounds>>()
     var fadeExplosionCommand = SingleLiveEvent<Triple<Float, Long, CompletableEmitter>>()
     var fadeAtCsCommand = SingleLiveEvent<Triple<Float, Long, CompletableEmitter>>()
     var explosionVisibilityChanged = SingleLiveEvent<Int>()
@@ -68,13 +70,13 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
     private fun splashAnimations(): ArrayList<Completable> {
         return arrayListOf(
                 Completable.create {
-                    changeBoundsAnimationCommand.value = changeBoundsTransition(500, AccelerateInterpolator(), it)
+                    changeBoundsAnimationCommand.value = Event(changeBoundsTransition(500, AccelerateInterpolator(), it))
                 },
                 Completable.create {
-                    changeBoundsAnimationCommand.value = changeBoundsTransition(2000, AccelerateInterpolator(), it)
+                    changeBoundsAnimationCommand.value = Event(changeBoundsTransition(2000, AccelerateInterpolator(), it))
                 },
                 Completable.create {
-                    changeBoundsAnimationCommand.value = changeBoundsTransition(200, OvershootInterpolator(), it)
+                    changeBoundsAnimationCommand.value = Event(changeBoundsTransition(200, OvershootInterpolator(), it))
                 },
                 Completable.create {
                     fadeExplosionCommand.value = Triple(0f, 200, it)

@@ -1,5 +1,6 @@
 package com.example.mirek.androidquestions.splash
 
+import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.os.Bundle
 import android.support.annotation.IdRes
@@ -10,6 +11,7 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.example.mirek.androidquestions.Event
 import com.example.mirek.androidquestions.R
 import com.example.mirek.androidquestions.SingleLiveEvent
 import com.example.mirek.androidquestions.databinding.SplashFragmentInitialEmptyBinding
@@ -62,7 +64,7 @@ class SplashFragment() : Fragment() {
             onSingleLiveEvent(nextPhaseConstraints) {
                 syncConstraintsWithLayout(getlayoutForPhase(completedAnimationPhases))
             }
-            onSingleLiveEvent(changeBoundsAnimationCommand) {
+            onWrappedEvent(changeBoundsAnimationCommand) {
                 syncConstraintWithAnimation(it)
             }
             onSingleLiveEvent(fadeExplosionCommand) {
@@ -124,7 +126,17 @@ class SplashFragment() : Fragment() {
 
     private fun splashViewModel(block: SplashViewModel.() -> Unit) = viewDataBinding.viewmodel?.let(block)
 
-    private fun <T> onSingleLiveEvent(event: SingleLiveEvent<T>, block: (T?) -> Unit): SingleLiveEvent<T>? =
+    private fun <T> onWrappedEvent(event: MutableLiveData<Event<T>>, block: (T?) -> Unit) =
+            event.also {
+                it.observe(this@SplashFragment, Observer {
+                    it?.getContentIfNotHandled()?.let {
+                        block(it)
+                    }
+                })
+            }
+
+
+    private fun <T> onSingleLiveEvent(event: SingleLiveEvent<T>, block: (T?) -> Unit) =
             event.also {
                 it.observe(this@SplashFragment, Observer {
                     block(it)
