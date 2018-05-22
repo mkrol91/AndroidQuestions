@@ -1,7 +1,5 @@
 package com.example.mirek.androidquestions.splash
 
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Observer
 import android.os.Bundle
 import android.support.annotation.IdRes
 import android.support.constraint.ConstraintSet
@@ -11,10 +9,10 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.mirek.androidquestions.Event
 import com.example.mirek.androidquestions.R
-import com.example.mirek.androidquestions.SingleLiveEvent
 import com.example.mirek.androidquestions.databinding.SplashFragmentInitialEmptyBinding
+import com.example.mirek.androidquestions.util.onSingleLiveEvent
+import com.example.mirek.androidquestions.util.onWrappedEvent
 import kotlinx.android.synthetic.main.splash_fragment_initial_empty.*
 
 class SplashFragment() : Fragment() {
@@ -58,16 +56,16 @@ class SplashFragment() : Fragment() {
 
     private fun setupActionsForFragment() {
         splashViewModel {
-            onSingleLiveEvent(setNewConstraintsCommand) {
+            this@SplashFragment.onWrappedEvent(setNewConstraintsCommand) {
                 syncConstraintsWithLayout(it)
             }
-            onSingleLiveEvent(nextPhaseConstraints) {
+            this@SplashFragment.onWrappedEvent(nextPhaseConstraints) {
                 syncConstraintsWithLayout(getlayoutForPhase(completedAnimationPhases))
             }
-            onWrappedEvent(changeBoundsAnimationCommand) {
+            this@SplashFragment.onWrappedEvent(changeBoundsAnimationCommand) {
                 syncConstraintWithAnimation(it)
             }
-            onSingleLiveEvent(fadeExplosionCommand) {
+            this@SplashFragment.onWrappedEvent(fadeExplosionCommand) {
                 if (it != null) {
                     val (alpha, duration, emitter) = it
                     explosion.animate()
@@ -79,10 +77,10 @@ class SplashFragment() : Fragment() {
                             }
                 }
             }
-            onSingleLiveEvent(incCompletedAnimationPhases) {
+            onSingleLiveEvent(this@SplashFragment, incCompletedAnimationPhases) {
                 ++completedAnimationPhases
             }
-            onSingleLiveEvent(fadeAtCsCommand) {
+            onSingleLiveEvent(this@SplashFragment, fadeAtCsCommand) {
                 with(atCs) {
                     it?.let {
                         visibility = View.VISIBLE
@@ -92,11 +90,11 @@ class SplashFragment() : Fragment() {
                     }
                 }
             }
-            onSingleLiveEvent(explosionVisibilityChanged) {
+            onSingleLiveEvent(this@SplashFragment, explosionVisibilityChanged) {
                 if (it != null)
                     explosion.visibility = it
             }
-            onSingleLiveEvent(atCsVisibilityChanged) {
+            onSingleLiveEvent(this@SplashFragment, atCsVisibilityChanged) {
                 if (it != null)
                     atCs.visibility = it
             }
@@ -125,23 +123,6 @@ class SplashFragment() : Fragment() {
     }
 
     private fun splashViewModel(block: SplashViewModel.() -> Unit) = viewDataBinding.viewmodel?.let(block)
-
-    private fun <T> onWrappedEvent(event: MutableLiveData<Event<T>>, block: (T?) -> Unit) =
-            event.also {
-                it.observe(this@SplashFragment, Observer {
-                    it?.getContentIfNotHandled()?.let {
-                        block(it)
-                    }
-                })
-            }
-
-
-    private fun <T> onSingleLiveEvent(event: SingleLiveEvent<T>, block: (T?) -> Unit) =
-            event.also {
-                it.observe(this@SplashFragment, Observer {
-                    block(it)
-                })
-            }
 
     companion object {
         private val COMPLETED_ANIMATION_PHASES: String = "COMPLETED_ANIMATION_PHASES"

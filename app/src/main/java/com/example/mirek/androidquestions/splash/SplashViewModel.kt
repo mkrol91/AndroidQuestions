@@ -22,12 +22,12 @@ import io.reactivex.disposables.CompositeDisposable
 class SplashViewModel(context: Application, repository: DataRepository) : AndroidViewModel(context) {
 
     var changeBoundsAnimationCommand = MutableLiveData<Event<ChangeBounds>>()
-    var fadeExplosionCommand = SingleLiveEvent<Triple<Float, Long, CompletableEmitter>>()
+    val fadeExplosionCommand = MutableLiveData<Event<Triple<Float, Long, CompletableEmitter>>>()
     var fadeAtCsCommand = SingleLiveEvent<Triple<Float, Long, CompletableEmitter>>()
     var explosionVisibilityChanged = SingleLiveEvent<Int>()
     var atCsVisibilityChanged = SingleLiveEvent<Int>()
-    var setNewConstraintsCommand = SingleLiveEvent<Int>()
-    var nextPhaseConstraints = SingleLiveEvent<Nothing>()
+    var setNewConstraintsCommand = MutableLiveData<Event<Int>>()
+    var nextPhaseConstraints = MutableLiveData<Event<Nothing>>()
     var incCompletedAnimationPhases = SingleLiveEvent<Nothing>()
 
     private var disposables = CompositeDisposable()
@@ -79,11 +79,11 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
                     changeBoundsAnimationCommand.value = Event(changeBoundsTransition(200, OvershootInterpolator(), it))
                 },
                 Completable.create {
-                    fadeExplosionCommand.value = Triple(0f, 200, it)
+                    fadeExplosionCommand.value = Event(Triple(0f, 200L, it))
                     incCompletedAnimationPhases.call()
                 },
                 Completable.create {
-                    nextPhaseConstraints.call()
+                    nextPhaseConstraints.value = null
                     incCompletedAnimationPhases.call()
                     it.onComplete()
                 },
@@ -126,7 +126,7 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
     }
 
     fun restoreConstraintsInAnimationPhase(completedAnimationPhases: Int) {
-        setNewConstraintsCommand.value = getlayoutForPhase(completedAnimationPhases - 1)
+        setNewConstraintsCommand.value = Event(getlayoutForPhase(completedAnimationPhases - 1))
     }
 
     fun restoreViewsVisibilityInAnimationPhase(completedAnimationPhases: Int) {
@@ -137,7 +137,7 @@ class SplashViewModel(context: Application, repository: DataRepository) : Androi
     }
 
     fun syncConstraintsWithoutAnimation(completedAnimationPhases: Int) {
-        setNewConstraintsCommand.value = getlayoutForPhase(completedAnimationPhases)
+        setNewConstraintsCommand.value = Event(getlayoutForPhase(completedAnimationPhases))
     }
 
 }
