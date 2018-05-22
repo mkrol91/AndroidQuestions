@@ -12,13 +12,13 @@ import android.view.animation.AccelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import com.example.mirek.androidquestions.Event
 import com.example.mirek.androidquestions.R
-import com.example.mirek.androidquestions.data.source.DataRepository
+import com.example.mirek.androidquestions.data.source.QuestionsRepository
 import io.reactivex.Completable
 import io.reactivex.CompletableEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 
-class SplashViewModel(context: Application, repository: DataRepository) : AndroidViewModel(context) {
+class SplashViewModel(context: Application, repository: QuestionsRepository) : AndroidViewModel(context) {
 
     var changeBoundsAnimationCommand = MutableLiveData<Event<ChangeBounds>>()
     val fadeExplosionCommand = MutableLiveData<Event<Triple<Float, Long, CompletableEmitter>>>()

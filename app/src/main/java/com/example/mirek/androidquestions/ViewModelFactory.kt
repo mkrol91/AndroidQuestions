@@ -4,11 +4,11 @@ import android.app.Application
 import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProvider
 import com.example.mirek.androidquestions.data.Injection
-import com.example.mirek.androidquestions.data.source.DataRepository
+import com.example.mirek.androidquestions.data.source.QuestionsRepository
 import com.example.mirek.androidquestions.splash.SplashViewModel
 
 class ViewModelFactory private constructor(private val application: Application,
-                                           private val repository: DataRepository) : ViewModelProvider.NewInstanceFactory() {
+                                           private val repository: QuestionsRepository) : ViewModelProvider.NewInstanceFactory() {
 
 
     //Injecting parameters to viewmodel during creation
@@ -31,7 +31,7 @@ class ViewModelFactory private constructor(private val application: Application,
                 ?: synchronized(ViewModelFactory::class.java) {
                     //todo: why synchronized?
                     INSTANCE //todo: why another check?
-                            ?: ViewModelFactory(application, Injection.provideDataRepository(application.applicationContext))
+                            ?: ViewModelFactory(application, Injection.provideQuestionsRepository(application.applicationContext))
                                     .also { INSTANCE = it }
                 }
     }
