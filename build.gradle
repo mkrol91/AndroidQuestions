@@ -2,6 +2,7 @@
 
 ext{
     archLifecycleVersion = "1.1.1"
+    roomVersion = "1.1.0"
 }
 
 buildscript {

@@ -52,4 +52,6 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxjava:2.1.13'
     implementation "android.arch.lifecycle:extensions:$rootProject.archLifecycleVersion"
     kapt "com.android.databinding:compiler:$gradlePluginVersion"
+    compile "android.arch.persistence.room:runtime:$rootProject.roomVersion"
+    kapt "android.arch.persistence.room:compiler:$rootProject.roomVersion"
 }

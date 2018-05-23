@@ -7,18 +7,20 @@ import android.arch.lifecycle.MutableLiveData
 import android.os.Handler
 import android.support.transition.ChangeBounds
 import android.support.transition.Transition
+import android.util.Log
 import android.view.View
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import com.example.mirek.androidquestions.Event
 import com.example.mirek.androidquestions.R
+import com.example.mirek.androidquestions.data.Question
 import com.example.mirek.androidquestions.data.source.QuestionsRepository
 import io.reactivex.Completable
 import io.reactivex.CompletableEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 
-class SplashViewModel(context: Application, repository: QuestionsRepository) : AndroidViewModel(context) {
+class SplashViewModel(context: Application, private val questionsRepository: QuestionsRepository) : AndroidViewModel(context) {
 
     var changeBoundsAnimationCommand = MutableLiveData<Event<ChangeBounds>>()
     val fadeExplosionCommand = MutableLiveData<Event<Triple<Float, Long, CompletableEmitter>>>()
@@ -39,6 +41,15 @@ class SplashViewModel(context: Application, repository: QuestionsRepository) : A
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe({}, {}))
         }
+    }
+
+    fun saveQuestion() {
+        val question = Question("1", "How much wheels have vehicle with 4 wheels?", "single_answer")
+        if (question.isWrong) {
+            Log.i("android_questions_debug", "Question is wrong during addition")
+            return
+        }
+        questionsRepository.saveQuestion(question)
     }
 
     private fun initialDelay(): ArrayList<Completable> {

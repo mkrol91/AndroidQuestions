@@ -1,9 +1,10 @@
 package com.example.mirek.androidquestions.data.source
 
-class QuestionsLocalDataSource private constructor(
+import com.example.mirek.androidquestions.data.Question
 
-) : QuestionsDataSource {
-
+class QuestionsLocalDataSource private constructor() : QuestionsDataSource {
+    override fun saveQuestion(question: Question) {
+    }
 
     companion object {
         private var INSTANCE: QuestionsLocalDataSource? = null
