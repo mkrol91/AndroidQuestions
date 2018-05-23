@@ -1,4 +1,4 @@
-package com.example.mirek.androidquestions.data.source
+package com.example.mirek.androidquestions.data.source.local
 
 import android.arch.persistence.room.Database
 import android.arch.persistence.room.RoomDatabase

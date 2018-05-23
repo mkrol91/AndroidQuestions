@@ -14,7 +14,7 @@ import android.view.animation.OvershootInterpolator
 import com.example.mirek.androidquestions.Event
 import com.example.mirek.androidquestions.R
 import com.example.mirek.androidquestions.data.Question
-import com.example.mirek.androidquestions.data.source.QuestionsRepository
+import com.example.mirek.androidquestions.data.source.local.QuestionsRepository
 import io.reactivex.Completable
 import io.reactivex.CompletableEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers

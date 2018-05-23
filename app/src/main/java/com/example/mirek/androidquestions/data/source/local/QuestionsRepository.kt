@@ -1,4 +1,4 @@
-package com.example.mirek.androidquestions.data.source
+package com.example.mirek.androidquestions.data.source.local
 
 import com.example.mirek.androidquestions.data.Question
 
@@ -15,7 +15,8 @@ class QuestionsRepository(val questionsLocalDataSource: QuestionsDataSource) {
         @JvmStatic
         fun getInstance(questionsLocalDataSource: QuestionsDataSource) = INSTANCE
                 ?: synchronized(QuestionsRepository::class.java) {
-                    INSTANCE ?: QuestionsRepository(questionsLocalDataSource)
+                    INSTANCE
+                            ?: QuestionsRepository(questionsLocalDataSource)
                             .also { INSTANCE = it }
                 }
     }

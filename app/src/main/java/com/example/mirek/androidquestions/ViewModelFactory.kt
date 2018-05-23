@@ -4,7 +4,7 @@ import android.app.Application
 import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProvider
 import com.example.mirek.androidquestions.data.Injection
-import com.example.mirek.androidquestions.data.source.QuestionsRepository
+import com.example.mirek.androidquestions.data.source.local.QuestionsRepository
 import com.example.mirek.androidquestions.splash.SplashViewModel
 
 class ViewModelFactory private constructor(private val application: Application,

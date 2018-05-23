@@ -1,4 +1,4 @@
-package com.example.mirek.androidquestions.data.source
+package com.example.mirek.androidquestions.data.source.local
 
 import com.example.mirek.androidquestions.data.Question
 
