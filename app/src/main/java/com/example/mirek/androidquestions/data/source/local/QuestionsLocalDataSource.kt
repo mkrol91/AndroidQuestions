@@ -15,7 +15,9 @@ class QuestionsLocalDataSource private constructor(val appExecutors: AppExecutor
         @JvmStatic
         fun getInstance(appExecutors: AppExecutors, questionsDao: QuestionsDao): QuestionsLocalDataSource {
             if (INSTANCE == null) {
-                INSTANCE = QuestionsLocalDataSource(appExecutors, questionsDao)
+                synchronized(QuestionsLocalDataSource::javaClass) {
+                    INSTANCE = QuestionsLocalDataSource(appExecutors, questionsDao)
+                }
             }
             return INSTANCE!!
         }
