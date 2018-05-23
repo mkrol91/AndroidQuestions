@@ -49,6 +49,7 @@ class SplashFragment() : Fragment() {
     override fun onResume() {
         super.onResume()
         splashViewModel {
+            saveQuestion()
             startAnimation(completedAnimationPhases)
         }
     }

@@ -8,11 +8,8 @@ import com.example.mirek.androidquestions.util.AppExecutors
 
 object Injection {
     fun provideQuestionsRepository(context: Context): QuestionsRepository {
-        val database = AndroidQuestionsDatabase.getInstance()
-        return QuestionsRepository.getInstance(QuestionsLocalDataSource.getInstance(AppExecutors()))
+        val database = AndroidQuestionsDatabase.getInstance(context)
+        return QuestionsRepository.getInstance(QuestionsLocalDataSource.getInstance(AppExecutors(),
+                database.questionsDao()))
     }
-
-//    fun getInstance(context: Context): AndroidQuestionsDatabase{
-//
-//    }
 }
